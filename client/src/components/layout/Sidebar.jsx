@@ -7,7 +7,6 @@ import {
   Building2,
   Swords,
   Zap,
-  ShieldAlert,
   Lightbulb,
   ClipboardList,
   DollarSign,
@@ -17,7 +16,6 @@ import {
 
 const nav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/incidents", label: "Incident Thread", icon: ShieldAlert, badge: "hot" },
   { to: "/transcripts", label: "Transcripts", icon: FileText },
   { to: "/sentiment", label: "Sentiment", icon: TrendingUp },
   { to: "/accounts", label: "Account Health", icon: Building2 },

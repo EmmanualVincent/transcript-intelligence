@@ -93,14 +93,6 @@ export default function Dashboard() {
             {data.dateRange?.start} – {data.dateRange?.end} · {data.totalTranscripts} calls analyzed
           </p>
         </div>
-        <Link
-          to="/incidents"
-          className="flex items-center gap-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
-          <Shield className="h-4 w-4" />
-          View Incident Thread
-          <ArrowRight className="h-3 w-3" />
-        </Link>
       </div>
 
       {/* Stat cards */}

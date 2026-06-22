@@ -8,7 +8,6 @@ import Sentiment from "@/pages/Sentiment"
 import Accounts from "@/pages/Accounts"
 import AccountDetail from "@/pages/AccountDetail"
 import Competitive from "@/pages/Competitive"
-import Incidents from "@/pages/Incidents"
 import Features from "@/pages/Features"
 import Actions from "@/pages/Actions"
 import RevenueRisk from "@/pages/RevenueRisk"
@@ -35,7 +34,6 @@ export default function App() {
             <main className="flex-1">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/incidents" element={<Incidents />} />
                 <Route path="/transcripts" element={<Transcripts />} />
                 <Route path="/transcripts/:id" element={<TranscriptDetail />} />
                 <Route path="/sentiment" element={<Sentiment />} />
