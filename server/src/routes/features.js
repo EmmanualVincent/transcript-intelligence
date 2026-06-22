@@ -5,6 +5,8 @@ const { getStore } = require('../data/store');
 
 const router = Router();
 
+const SIGNAL_TYPES = ['feature_gap', 'concern', 'technical_issue'];
+
 function inferProductArea(text) {
   const t = text.toLowerCase();
   if (/scim|mfa|sso|identity|saml|ldap|provisioning|okta|entra|active directory|iam|privileged access|session timeout|role.based/.test(t)) return 'Identity';
@@ -17,71 +19,93 @@ function inferProductArea(text) {
 
 // GET /api/features
 router.get('/', (req, res) => {
-  const { transcripts } = getStore();
+  const { transcripts, accounts } = getStore();
 
-  const gapMap = {};
+  // Build account risk lookup
+  const riskByAccount = {};
+  for (const acc of accounts) {
+    riskByAccount[acc.name] = { riskLevel: acc.riskLevel, riskScore: acc.riskScore };
+  }
+
+  const RISK_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
+
+  // Collect all customer-raised signals from external calls only
+  const issues = [];
 
   for (const t of transcripts) {
+    if (t.callType !== 'external') continue;
+
     for (const km of t.keyMoments || []) {
-      if (km.type !== 'feature_gap') continue;
+      if (!SIGNAL_TYPES.includes(km.type)) continue;
 
-      const text = km.text || '';
-      const area = inferProductArea(text);
-      const key = `${area}__${text.slice(0, 60)}`; // deduplicate near-identical gaps
+      const area = inferProductArea(km.text || '');
+      const acctRisk = riskByAccount[t.customerAccount] || null;
 
-      if (!gapMap[key]) {
-        gapMap[key] = {
-          area,
-          description: text,
-          mentions: 0,
-          accounts: new Set(),
-          transcripts: [],
-        };
-      }
-
-      gapMap[key].mentions++;
-      if (t.customerAccount) gapMap[key].accounts.add(t.customerAccount);
-      gapMap[key].transcripts.push({
-        id: t.id,
-        title: t.title,
-        callType: t.callType,
-        date: t.startTime ? t.startTime.slice(0, 10) : null,
+      issues.push({
+        area,
+        type: km.type,
+        text: km.text || '',
         speaker: km.speaker || null,
+        account: t.customerAccount || null,
+        riskLevel: acctRisk?.riskLevel || null,
+        riskScore: acctRisk?.riskScore || 0,
+        transcriptId: t.id,
+        transcriptTitle: t.title,
+        date: t.startTime ? t.startTime.slice(0, 10) : null,
+        sentimentScore: t.sentimentScore,
       });
     }
   }
 
-  // Aggregate by area
+  // Sort all issues: by risk score desc, then date desc
+  issues.sort((a, b) =>
+    (RISK_ORDER[a.riskLevel] ?? 4) - (RISK_ORDER[b.riskLevel] ?? 4) ||
+    (b.date || '').localeCompare(a.date || '')
+  );
+
+  // Group by product area
   const byArea = {};
-  for (const gap of Object.values(gapMap)) {
-    if (!byArea[gap.area]) byArea[gap.area] = { area: gap.area, totalMentions: 0, gaps: [] };
-    byArea[gap.area].totalMentions += gap.mentions;
-    byArea[gap.area].gaps.push({
-      description: gap.description,
-      mentions: gap.mentions,
-      accounts: [...gap.accounts],
-      transcripts: gap.transcripts,
-    });
+  for (const issue of issues) {
+    if (!byArea[issue.area]) {
+      byArea[issue.area] = {
+        area: issue.area,
+        totalIssues: 0,
+        featureGaps: 0,
+        concerns: 0,
+        technicalIssues: 0,
+        issues: [],
+      };
+    }
+    const entry = byArea[issue.area];
+    entry.totalIssues++;
+    if (issue.type === 'feature_gap') entry.featureGaps++;
+    if (issue.type === 'concern') entry.concerns++;
+    if (issue.type === 'technical_issue') entry.technicalIssues++;
+    entry.issues.push(issue);
   }
 
-  // Sort areas by total mentions, gaps within each area by mentions
   const areas = Object.values(byArea)
-    .sort((a, b) => b.totalMentions - a.totalMentions)
-    .map(a => ({
-      ...a,
-      gaps: a.gaps.sort((x, y) => y.mentions - x.mentions),
-    }));
+    .sort((a, b) => b.totalIssues - a.totalIssues);
 
-  // Flat list for quick access
-  const allGaps = Object.values(gapMap).map(g => ({
-    area: g.area,
-    description: g.description,
-    mentions: g.mentions,
-    accounts: [...g.accounts],
-    transcripts: g.transcripts,
-  })).sort((a, b) => b.mentions - a.mentions);
+  // Summary stats
+  const totalIssues = issues.length;
+  const totalFeatureGaps = issues.filter(i => i.type === 'feature_gap').length;
+  const totalConcerns = issues.filter(i => i.type === 'concern').length;
+  const totalTechIssues = issues.filter(i => i.type === 'technical_issue').length;
+  const criticalRiskIssues = issues.filter(i => i.riskLevel === 'critical' || i.riskLevel === 'high').length;
 
-  res.json({ areas, allGaps, totalGaps: allGaps.length });
+  // Unique accounts affected
+  const affectedAccounts = [...new Set(issues.map(i => i.account).filter(Boolean))];
+
+  res.json({
+    totalIssues,
+    totalFeatureGaps,
+    totalConcerns,
+    totalTechIssues,
+    criticalRiskIssues,
+    affectedAccounts: affectedAccounts.length,
+    areas,
+  });
 });
 
 module.exports = router;

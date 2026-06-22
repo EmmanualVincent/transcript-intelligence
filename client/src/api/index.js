@@ -30,4 +30,6 @@ export const api = {
   features: () => get('/features'),
   actions: () => get('/actions'),
   revenueRisk: () => get('/revenue-risk'),
+  syncs: () => get('/syncs'),
+  productHealth: () => get('/product-health'),
 }

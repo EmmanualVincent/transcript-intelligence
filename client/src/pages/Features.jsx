@@ -1,144 +1,258 @@
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "react-router-dom"
 import { api } from "@/api"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn, formatDate } from "@/lib/utils"
-import { Lightbulb, ChevronDown, ChevronUp } from "lucide-react"
-import { useState } from "react"
+import { cn, formatDate, riskColor } from "@/lib/utils"
+import { Lightbulb, AlertTriangle, Wrench, Building2, ChevronRight } from "lucide-react"
 
-const AREA_COLORS = {
-  Identity: "from-violet-500 to-purple-600",
-  Comply: "from-blue-500 to-indigo-600",
-  Detect: "from-red-500 to-rose-600",
-  Protect: "from-emerald-500 to-teal-600",
-  LogVault: "from-cyan-500 to-sky-600",
-  Platform: "from-gray-500 to-gray-600",
+const AREA_ACCENT = {
+  Identity: { border: "border-l-violet-400", header: "text-violet-700", badge: "bg-violet-50 text-violet-700 border-violet-200", dot: "bg-violet-400" },
+  Comply:   { border: "border-l-blue-400",   header: "text-blue-700",   badge: "bg-blue-50 text-blue-700 border-blue-200",     dot: "bg-blue-400"   },
+  Detect:   { border: "border-l-red-400",    header: "text-red-700",    badge: "bg-red-50 text-red-700 border-red-200",         dot: "bg-red-400"    },
+  Protect:  { border: "border-l-emerald-400",header: "text-emerald-700",badge: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "bg-emerald-400" },
+  LogVault: { border: "border-l-cyan-400",   header: "text-cyan-700",   badge: "bg-cyan-50 text-cyan-700 border-cyan-200",       dot: "bg-cyan-400"   },
+  Platform: { border: "border-l-gray-400",   header: "text-gray-700",   badge: "bg-gray-50 text-gray-700 border-gray-200",       dot: "bg-gray-400"   },
 }
 
-const AREA_BG = {
-  Identity: "bg-violet-50 border-violet-200",
-  Comply: "bg-blue-50 border-blue-200",
-  Detect: "bg-red-50 border-red-200",
-  Protect: "bg-emerald-50 border-emerald-200",
-  LogVault: "bg-cyan-50 border-cyan-200",
-  Platform: "bg-gray-50 border-gray-200",
+const SIGNAL_META = {
+  feature_gap:      { label: "Feature Gap",      icon: Lightbulb,    badge: "bg-violet-50 text-violet-700 border-violet-200" },
+  concern:          { label: "Customer Concern",  icon: AlertTriangle, badge: "bg-amber-50 text-amber-700 border-amber-200"  },
+  technical_issue:  { label: "Technical Issue",  icon: Wrench,        badge: "bg-red-50 text-red-700 border-red-200"         },
 }
 
-function GapItem({ gap }) {
-  const [expanded, setExpanded] = useState(false)
+const FILTER_OPTIONS = [
+  { value: "all",              label: "All Issues" },
+  { value: "feature_gap",      label: "Feature Gaps" },
+  { value: "concern",          label: "Concerns" },
+  { value: "technical_issue",  label: "Technical Issues" },
+]
+
+function StatCard({ label, value, sub, color, icon: Icon }) {
   return (
-    <div className="border border-border rounded-lg overflow-hidden">
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-start gap-3 p-3.5 hover:bg-muted/50 transition-colors text-left"
-      >
-        <div className="flex-1 min-w-0">
-          <p className="text-sm text-foreground leading-relaxed">{gap.description}</p>
-          <div className="flex items-center gap-3 mt-2 flex-wrap">
-            <span className="text-xs text-muted-foreground font-medium">{gap.mentions} mention{gap.mentions > 1 ? "s" : ""}</span>
-            <div className="flex gap-1 flex-wrap">
-              {(gap.accounts || []).map(acc => (
-                <Link key={acc} to={`/accounts/${encodeURIComponent(acc)}`} onClick={e => e.stopPropagation()}>
-                  <Badge className="text-[10px] bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer">{acc}</Badge>
-                </Link>
-              ))}
-            </div>
+    <Card>
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</p>
+            <p className={cn("text-3xl font-bold mt-1 tracking-tight", color)}>{value}</p>
+            {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
+          </div>
+          <div className={cn("p-2 rounded-lg bg-muted", color)}>
+            <Icon className="h-5 w-5" />
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0 mt-0.5">
-          <div className="text-center">
-            <p className="text-sm font-black">{gap.mentions}</p>
-            <p className="text-[10px] text-muted-foreground">requests</p>
-          </div>
-          {expanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
-        </div>
-      </button>
-      {expanded && gap.transcripts?.length > 0 && (
-        <div className="border-t border-border bg-muted/30 p-3 space-y-1.5">
-          <p className="text-[10px] uppercase tracking-wide font-semibold text-muted-foreground mb-2">Mentioned in:</p>
-          {gap.transcripts.map((tr, i) => (
-            <Link key={i} to={`/transcripts/${tr.id}`} className="flex items-center gap-2 text-xs hover:text-primary transition-colors group">
-              <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground group-hover:bg-primary transition-colors flex-shrink-0" />
-              <span className="line-clamp-1 flex-1">{tr.title}</span>
-              <span className="text-muted-foreground flex-shrink-0">{formatDate(tr.date)}</span>
+      </CardContent>
+    </Card>
+  )
+}
+
+function IssueRow({ issue }) {
+  const signal = SIGNAL_META[issue.type] || SIGNAL_META.concern
+  const SignalIcon = signal.icon
+
+  return (
+    <Link
+      to={`/transcripts/${issue.transcriptId}`}
+      className="group flex items-start gap-3 p-3.5 rounded-lg border hover:border-primary/40 hover:bg-muted/30 transition-all"
+    >
+      <SignalIcon className={cn(
+        "h-4 w-4 flex-shrink-0 mt-0.5",
+        issue.type === "feature_gap" ? "text-violet-500"
+          : issue.type === "concern" ? "text-amber-500"
+          : "text-red-500"
+      )} />
+
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-foreground leading-relaxed">{issue.text}</p>
+        <div className="flex items-center gap-2 mt-2 flex-wrap">
+          <Badge className={cn("text-[10px] border", signal.badge)}>
+            {signal.label}
+          </Badge>
+          {issue.account && (
+            <Link
+              to={`/accounts/${encodeURIComponent(issue.account)}`}
+              onClick={e => e.stopPropagation()}
+              className="flex items-center gap-1"
+            >
+              <Badge className={cn("text-[10px] border", riskColor(issue.riskLevel))}>
+                {issue.account}
+              </Badge>
             </Link>
-          ))}
+          )}
+          {issue.date && (
+            <span className="text-[10px] text-muted-foreground">{formatDate(issue.date)}</span>
+          )}
+          {issue.speaker && (
+            <span className="text-[10px] text-muted-foreground">— {issue.speaker}</span>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+
+      <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary flex-shrink-0 mt-0.5 transition-colors" />
+    </Link>
+  )
+}
+
+function AreaCard({ area, filter }) {
+  const accent = AREA_ACCENT[area.area] || AREA_ACCENT.Platform
+  const visible = area.issues.filter(i => filter === "all" || i.type === filter)
+  if (!visible.length) return null
+
+  return (
+    <Card className={cn("border-l-4", accent.border)} id={area.area}>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <CardTitle className={cn("text-base", accent.header)}>{area.area}</CardTitle>
+            <CardDescription className="mt-0.5">
+              {visible.length} issue{visible.length !== 1 ? "s" : ""}
+              {filter === "all" && (
+                <span className="ml-2 text-xs">
+                  {area.featureGaps > 0 && <span>{area.featureGaps} gaps · </span>}
+                  {area.concerns > 0 && <span>{area.concerns} concerns · </span>}
+                  {area.technicalIssues > 0 && <span>{area.technicalIssues} tech issues</span>}
+                </span>
+              )}
+            </CardDescription>
+          </div>
+          <span className={cn("text-2xl font-black", accent.header)}>{visible.length}</span>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2 pt-0">
+        {visible.map((issue, i) => (
+          <IssueRow key={i} issue={issue} />
+        ))}
+      </CardContent>
+    </Card>
   )
 }
 
 export default function Features() {
+  const [filter, setFilter] = useState("all")
   const { data, isLoading } = useQuery({ queryKey: ["features"], queryFn: api.features })
 
   if (isLoading) return (
-    <div className="p-6 space-y-4">
-      <Skeleton className="h-8 w-64" />
-      {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-48" />)}
+    <div className="p-6 space-y-5">
+      <Skeleton className="h-8 w-72" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28" />)}
+      </div>
+      {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-64" />)}
     </div>
   )
 
-  const { areas = [], totalGaps } = data || {}
+  const {
+    totalIssues = 0, totalFeatureGaps = 0, totalConcerns = 0,
+    totalTechIssues = 0, criticalRiskIssues = 0, affectedAccounts = 0,
+    areas = [],
+  } = data || {}
+
+  const visibleCount = filter === "all" ? totalIssues
+    : filter === "feature_gap" ? totalFeatureGaps
+    : filter === "concern" ? totalConcerns
+    : totalTechIssues
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-5 animate-fade-in">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Feature Gap Analysis</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Customer Issues</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          {totalGaps} feature gaps from customer conversations — a customer-validated backlog with account names attached
+          {totalIssues} signals raised by customers in external calls — feature gaps, concerns, and technical issues across {affectedAccounts} accounts
         </p>
       </div>
 
-      <div className="bg-violet-50 border border-violet-200 rounded-xl p-4 flex items-start gap-3">
-        <Lightbulb className="h-5 w-5 text-violet-600 flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-semibold text-violet-800">For Product Managers</p>
-          <p className="text-sm text-violet-700 mt-0.5">
-            These gaps emerged organically in renewal, support, and onboarding calls — customers naming what they need in their own words, with business context no survey captures. Each gap links directly to the transcript where it was raised.
-          </p>
+      {/* Alert */}
+      {criticalRiskIssues > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-red-800">
+              {criticalRiskIssues} issues raised by critical or high-risk accounts
+            </p>
+            <p className="text-sm text-red-700 mt-0.5">
+              These customers have active churn signals. Unresolved issues here directly increase the probability of losing the account.
+            </p>
+          </div>
         </div>
+      )}
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={Lightbulb}      label="Feature Gaps"      value={totalFeatureGaps}    sub="Functionality customers asked for"       color="text-violet-600" />
+        <StatCard icon={AlertTriangle}  label="Customer Concerns" value={totalConcerns}        sub="Pain points raised on calls"            color="text-amber-600"  />
+        <StatCard icon={Wrench}         label="Technical Issues"  value={totalTechIssues}      sub="Product problems named by customers"     color="text-red-600"    />
+        <StatCard icon={Building2}      label="Accounts Affected" value={affectedAccounts}     sub={`${criticalRiskIssues} on at-risk accounts`} color="text-foreground" />
       </div>
 
-      {/* Summary bar */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      {/* Area nav */}
+      <div className="flex gap-2 flex-wrap">
+        {areas.map(area => {
+          const accent = AREA_ACCENT[area.area] || AREA_ACCENT.Platform
+          const count = filter === "all" ? area.totalIssues
+            : filter === "feature_gap" ? area.featureGaps
+            : filter === "concern" ? area.concerns
+            : area.technicalIssues
+          if (!count) return null
+          return (
+            <a
+              key={area.area}
+              href={`#${area.area}`}
+              className={cn("flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors hover:opacity-80", accent.badge)}
+            >
+              <span className={cn("h-2 w-2 rounded-full flex-shrink-0", accent.dot)} />
+              {area.area}
+              <span className="font-bold">{count}</span>
+            </a>
+          )
+        })}
+      </div>
+
+      {/* Filter tabs */}
+      <div className="flex gap-1.5 p-1 bg-muted rounded-xl w-fit">
+        {FILTER_OPTIONS.map(opt => {
+          const count = opt.value === "all" ? totalIssues
+            : opt.value === "feature_gap" ? totalFeatureGaps
+            : opt.value === "concern" ? totalConcerns
+            : totalTechIssues
+          return (
+            <button
+              key={opt.value}
+              onClick={() => setFilter(opt.value)}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5",
+                filter === opt.value
+                  ? "bg-white text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {opt.label}
+              <span className={cn(
+                "text-[11px] font-bold px-1.5 py-0.5 rounded-full",
+                filter === opt.value ? "bg-primary/10 text-primary" : "bg-muted-foreground/20 text-muted-foreground"
+              )}>
+                {count}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Area cards */}
+      <div className="space-y-4">
         {areas.map(area => (
-          <a key={area.area} href={`#${area.area}`} className={cn("rounded-xl border p-3 hover:shadow-sm transition-all text-center", AREA_BG[area.area] || "bg-muted border-border")}>
-            <p className="text-lg font-black">{area.totalMentions}</p>
-            <p className="text-xs font-medium">{area.area}</p>
-          </a>
+          <AreaCard key={area.area} area={area} filter={filter} />
         ))}
       </div>
 
-      {/* Areas */}
-      {areas.map(area => (
-        <Card key={area.area} id={area.area}>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className={cn("h-8 w-8 rounded-lg bg-gradient-to-br flex-shrink-0 flex items-center justify-center", AREA_COLORS[area.area] || "from-gray-400 to-gray-600")}>
-                <Lightbulb className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <CardTitle>{area.area}</CardTitle>
-                <CardDescription>
-                  {area.gaps.length} distinct gap{area.gaps.length > 1 ? "s" : ""} · {area.totalMentions} total mentions
-                </CardDescription>
-              </div>
-              <div className="ml-auto text-right">
-                <p className="text-2xl font-black">{area.totalMentions}</p>
-                <p className="text-xs text-muted-foreground">requests</p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {area.gaps.map((gap, i) => (
-              <GapItem key={i} gap={gap} />
-            ))}
-          </CardContent>
-        </Card>
-      ))}
+      {visibleCount === 0 && (
+        <div className="text-center py-12 text-muted-foreground text-sm">
+          No {filter === "all" ? "issues" : SIGNAL_META[filter]?.label.toLowerCase() + "s"} found.
+        </div>
+      )}
     </div>
   )
 }

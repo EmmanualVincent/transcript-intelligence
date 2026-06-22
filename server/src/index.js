@@ -22,6 +22,8 @@ app.use('/api/features',     require('./routes/features'));
 app.use('/api/actions',       require('./routes/actions'));
 app.use('/api/revenue-risk', require('./routes/revenue-risk'));
 app.use('/api/chat',        require('./routes/chat'));
+app.use('/api/syncs',          require('./routes/syncs'));
+app.use('/api/product-health', require('./routes/product-health'));
 
 // Health check
 app.get('/health', (req, res) => {

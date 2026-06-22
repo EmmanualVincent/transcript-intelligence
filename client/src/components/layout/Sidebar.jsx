@@ -11,6 +11,8 @@ import {
   Lightbulb,
   ClipboardList,
   DollarSign,
+  MonitorCheck,
+  Activity,
 } from "lucide-react"
 
 const nav = [
@@ -23,6 +25,8 @@ const nav = [
   { to: "/features", label: "Feature Gaps", icon: Lightbulb },
   { to: "/actions", label: "Action Items", icon: ClipboardList },
   { to: "/revenue-risk", label: "Revenue at Risk", icon: DollarSign, badge: "hot" },
+  { to: "/syncs", label: "Engineering Syncs", icon: MonitorCheck },
+  { to: "/product-health", label: "Product Health", icon: Activity },
 ]
 
 export function Sidebar() {

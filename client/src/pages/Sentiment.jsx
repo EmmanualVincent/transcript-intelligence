@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { api } from "@/api"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -40,7 +41,15 @@ function weekLabel(d) {
   return WEEK_LABELS[d] || d?.slice(5) || d
 }
 
+const CALL_TYPE_OPTIONS = [
+  { value: "all", label: "All Types" },
+  { value: "internal", label: "Internal" },
+  { value: "external", label: "External" },
+  { value: "support", label: "Support" },
+]
+
 export default function Sentiment() {
+  const [selectedType, setSelectedType] = useState("all")
   const { data: timeline, isLoading: tlLoading } = useQuery({ queryKey: ["sentiment-timeline"], queryFn: api.sentimentTimeline })
   const { data: byCategory, isLoading: bcLoading } = useQuery({ queryKey: ["sentiment-by-category"], queryFn: api.sentimentByCategory })
   const { data: byTopic, isLoading: btLoading } = useQuery({ queryKey: ["sentiment-by-topic"], queryFn: api.sentimentByTopic })
@@ -93,8 +102,21 @@ export default function Sentiment() {
       {/* Timeline chart */}
       <Card>
         <CardHeader>
-          <CardTitle>Sentiment Over Time</CardTitle>
-          <CardDescription>Weekly average by call type · Feb – Apr 2026</CardDescription>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <CardTitle>Sentiment Over Time</CardTitle>
+              <CardDescription>Weekly average by call type · Feb – Apr 2026</CardDescription>
+            </div>
+            <select
+              value={selectedType}
+              onChange={e => setSelectedType(e.target.value)}
+              className="text-sm border border-border rounded-lg px-3 py-1.5 bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 flex-shrink-0"
+            >
+              {CALL_TYPE_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={280}>
@@ -108,9 +130,15 @@ export default function Sentiment() {
               />
               <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "12px" }} />
               <Line type="monotone" dataKey="avgScore" stroke="#94a3b8" strokeWidth={1.5} dot={false} name="Overall" strokeDasharray="4 2" />
-              <Line type="monotone" dataKey="byCallType.external" stroke={CALL_TYPE_COLORS.external} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} name="External" />
-              <Line type="monotone" dataKey="byCallType.internal" stroke={CALL_TYPE_COLORS.internal} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} name="Internal" />
-              <Line type="monotone" dataKey="byCallType.support" stroke={CALL_TYPE_COLORS.support} strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} name="Support" />
+              {(selectedType === "all" || selectedType === "external") && (
+                <Line type="monotone" dataKey="byCallType.external" stroke={CALL_TYPE_COLORS.external} strokeWidth={selectedType === "external" ? 2.5 : 2} dot={{ r: 3 }} activeDot={{ r: 5 }} name="External" />
+              )}
+              {(selectedType === "all" || selectedType === "internal") && (
+                <Line type="monotone" dataKey="byCallType.internal" stroke={CALL_TYPE_COLORS.internal} strokeWidth={selectedType === "internal" ? 2.5 : 2} dot={{ r: 3 }} activeDot={{ r: 5 }} name="Internal" />
+              )}
+              {(selectedType === "all" || selectedType === "support") && (
+                <Line type="monotone" dataKey="byCallType.support" stroke={CALL_TYPE_COLORS.support} strokeWidth={selectedType === "support" ? 2.5 : 2} dot={{ r: 3 }} activeDot={{ r: 5 }} name="Support" />
+              )}
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
