@@ -9,21 +9,19 @@ import {
   Zap,
   Lightbulb,
   ClipboardList,
-  DollarSign,
   MonitorCheck,
   Activity,
 } from "lucide-react"
 
 const nav = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/", label: "Overview", icon: LayoutDashboard },
   { to: "/transcripts", label: "Transcripts", icon: FileText },
   { to: "/sentiment", label: "Sentiment", icon: TrendingUp },
   { to: "/accounts", label: "Account Health", icon: Building2 },
   { to: "/competitive", label: "Competitive Intel", icon: Swords },
   { to: "/features", label: "Feature Gaps", icon: Lightbulb },
-  { to: "/actions", label: "Action Items", icon: ClipboardList },
-  { to: "/revenue-risk", label: "Revenue at Risk", icon: DollarSign, badge: "hot" },
-  { to: "/syncs", label: "Engineering Syncs", icon: MonitorCheck },
+  { to: "/actions", label: "Action Owners", icon: ClipboardList },
+  { to: "/syncs", label: "Internal Syncs", icon: MonitorCheck },
   { to: "/product-health", label: "Product Health", icon: Activity },
 ]
 

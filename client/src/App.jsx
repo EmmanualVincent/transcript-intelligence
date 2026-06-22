@@ -10,7 +10,6 @@ import AccountDetail from "@/pages/AccountDetail"
 import Competitive from "@/pages/Competitive"
 import Features from "@/pages/Features"
 import Actions from "@/pages/Actions"
-import RevenueRisk from "@/pages/RevenueRisk"
 import Syncs from "@/pages/Syncs"
 import ProductHealth from "@/pages/ProductHealth"
 import { ChatWidget } from "@/components/ChatWidget"
@@ -42,7 +41,6 @@ export default function App() {
                 <Route path="/competitive" element={<Competitive />} />
                 <Route path="/features" element={<Features />} />
                 <Route path="/actions" element={<Actions />} />
-                <Route path="/revenue-risk" element={<RevenueRisk />} />
                 <Route path="/syncs" element={<Syncs />} />
                 <Route path="/product-health" element={<ProductHealth />} />
               </Routes>
