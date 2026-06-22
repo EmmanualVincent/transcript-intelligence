@@ -41,20 +41,8 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Company context */}
-      <div className="px-4 py-3 border-b border-border">
-        <div className="flex items-center gap-2.5 bg-muted rounded-lg px-3 py-2">
-          <div className="h-6 w-6 rounded-md bg-blue-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">A</div>
-          <div className="min-w-0">
-            <p className="text-xs font-medium text-foreground truncate">AegisCloud</p>
-            <p className="text-[10px] text-muted-foreground">B2B Cybersecurity</p>
-          </div>
-        </div>
-      </div>
-
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-3 mb-2">Analysis</p>
         {nav.map(({ to, label, icon: Icon, badge }) => (
           <NavLink
             key={to}
@@ -80,10 +68,17 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="px-4 py-4 border-t border-border">
-        <p className="text-[10px] text-muted-foreground text-center">100 transcripts · Feb–Apr 2026</p>
+      {/* Company context */}
+      <div className="px-4 py-3 border-t border-border">
+        <div className="flex items-center gap-2.5 bg-muted rounded-lg px-3 py-2">
+          <div className="h-6 w-6 rounded-md bg-blue-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">A</div>
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-foreground truncate">AegisCloud</p>
+            <p className="text-[10px] text-muted-foreground">B2B Cybersecurity</p>
+          </div>
+        </div>
       </div>
+
     </aside>
   )
 }
