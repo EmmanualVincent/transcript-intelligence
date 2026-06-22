@@ -12,20 +12,20 @@ import {
 } from "lucide-react"
 
 const PRODUCT_STYLE = {
-  Comply:   { bg: "bg-blue-50",    border: "border-blue-200",   accent: "bg-blue-600",    text: "text-blue-700",   muted: "text-blue-500",   ring: "ring-blue-200"   },
-  Identity: { bg: "bg-violet-50",  border: "border-violet-200", accent: "bg-violet-600",  text: "text-violet-700", muted: "text-violet-500", ring: "ring-violet-200" },
-  Detect:   { bg: "bg-red-50",     border: "border-red-200",    accent: "bg-red-600",     text: "text-red-700",    muted: "text-red-500",    ring: "ring-red-200"    },
-  Protect:  { bg: "bg-emerald-50", border: "border-emerald-200",accent: "bg-emerald-600", text: "text-emerald-700",muted: "text-emerald-500",ring: "ring-emerald-200"},
-  LogVault: { bg: "bg-cyan-50",    border: "border-cyan-200",   accent: "bg-cyan-600",    text: "text-cyan-700",   muted: "text-cyan-500",   ring: "ring-cyan-200"   },
-  Platform: { bg: "bg-gray-50",    border: "border-gray-200",   accent: "bg-gray-600",    text: "text-gray-700",   muted: "text-gray-500",   ring: "ring-gray-200"   },
+  Comply:   { bg: "bg-blue-50 dark:bg-blue-950/40",    border: "border-blue-200 dark:border-blue-800/60",   accent: "bg-blue-600",    text: "text-blue-700 dark:text-blue-400",   muted: "text-blue-500 dark:text-blue-400",   ring: "ring-blue-200 dark:ring-blue-800"   },
+  Identity: { bg: "bg-violet-50 dark:bg-violet-950/40",  border: "border-violet-200 dark:border-violet-800/60", accent: "bg-violet-600",  text: "text-violet-700 dark:text-violet-400", muted: "text-violet-500 dark:text-violet-400", ring: "ring-violet-200 dark:ring-violet-800" },
+  Detect:   { bg: "bg-red-50 dark:bg-red-950/40",     border: "border-red-200 dark:border-red-800/60",    accent: "bg-red-600",     text: "text-red-700 dark:text-red-400",    muted: "text-red-500 dark:text-red-400",    ring: "ring-red-200 dark:ring-red-800"    },
+  Protect:  { bg: "bg-emerald-50 dark:bg-emerald-950/40", border: "border-emerald-200 dark:border-emerald-800/60", accent: "bg-emerald-600", text: "text-emerald-700 dark:text-emerald-400", muted: "text-emerald-500 dark:text-emerald-400", ring: "ring-emerald-200 dark:ring-emerald-800" },
+  LogVault: { bg: "bg-cyan-50 dark:bg-cyan-950/40",    border: "border-cyan-200 dark:border-cyan-800/60",   accent: "bg-cyan-600",    text: "text-cyan-700 dark:text-cyan-400",   muted: "text-cyan-500 dark:text-cyan-400",   ring: "ring-cyan-200 dark:ring-cyan-800"   },
+  Platform: { bg: "bg-gray-50 dark:bg-gray-900/40",    border: "border-gray-200 dark:border-gray-700/60",   accent: "bg-gray-600",    text: "text-gray-700 dark:text-gray-400",   muted: "text-gray-500 dark:text-gray-400",   ring: "ring-gray-200 dark:ring-gray-700"   },
 }
 
 const TAG_META = {
-  retention_driver:  { label: "Retention Driver",   icon: RefreshCw,     color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  upsell_opportunity:{ label: "Upsell Opportunity", icon: ArrowUpRight,   color: "bg-blue-50 text-blue-700 border-blue-200"          },
-  high_satisfaction: { label: "High Satisfaction",  icon: Star,           color: "bg-amber-50 text-amber-700 border-amber-200"       },
-  active_adoption:   { label: "Active Adoption",    icon: Zap,            color: "bg-violet-50 text-violet-700 border-violet-200"    },
-  at_risk:           { label: "At Risk",            icon: AlertTriangle,  color: "bg-red-50 text-red-700 border-red-200"             },
+  retention_driver:  { label: "Retention Driver",   icon: RefreshCw,     color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60" },
+  upsell_opportunity:{ label: "Upsell Opportunity", icon: ArrowUpRight,   color: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/60"                  },
+  high_satisfaction: { label: "High Satisfaction",  icon: Star,           color: "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/60"             },
+  active_adoption:   { label: "Active Adoption",    icon: Zap,            color: "bg-violet-50 dark:bg-violet-950/40 text-violet-700 dark:text-violet-400 border-violet-200 dark:border-violet-800/60"        },
+  at_risk:           { label: "At Risk",            icon: AlertTriangle,  color: "bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/60"                         },
 }
 
 const ISSUE_STYLE = {
@@ -67,7 +67,7 @@ function QuoteCard({ quote, style }) {
   return (
     <Link
       to={`/transcripts/${quote.transcriptId}`}
-      className="group block p-3 rounded-lg bg-white border border-border hover:border-primary/40 hover:shadow-sm transition-all"
+      className="group block p-3 rounded-lg bg-card border border-border hover:border-primary/40 hover:shadow-sm transition-all"
     >
       <p className="text-xs text-foreground leading-relaxed line-clamp-3 italic">
         "{quote.text}"
@@ -90,7 +90,7 @@ function IssueRow({ issue }) {
   return (
     <Link
       to={`/transcripts/${issue.transcriptId}`}
-      className="group flex items-start gap-2.5 p-2.5 rounded-lg hover:bg-white hover:shadow-sm border border-transparent hover:border-border transition-all"
+      className="group flex items-start gap-2.5 p-2.5 rounded-lg hover:bg-card hover:shadow-sm border border-transparent hover:border-border transition-all"
     >
       <div className={cn("h-2 w-2 rounded-full flex-shrink-0 mt-1.5", meta.dot)} />
       <p className="text-xs text-foreground leading-relaxed flex-1 line-clamp-2">{issue.text}</p>
@@ -103,7 +103,7 @@ function UpsellRow({ upsell }) {
   return (
     <Link
       to={`/transcripts/${upsell.transcriptId}`}
-      className="group flex items-start gap-2.5 p-2.5 rounded-lg hover:bg-white hover:shadow-sm border border-transparent hover:border-border transition-all"
+      className="group flex items-start gap-2.5 p-2.5 rounded-lg hover:bg-card hover:shadow-sm border border-transparent hover:border-border transition-all"
     >
       <ArrowUpRight className="h-3.5 w-3.5 text-blue-500 flex-shrink-0 mt-0.5" />
       <p className="text-xs text-foreground leading-relaxed flex-1 line-clamp-2">{upsell.text}</p>
@@ -346,7 +346,7 @@ export default function ProductHealth() {
               onClick={() => setSort(opt.value)}
               className={cn(
                 "px-3 py-1.5 rounded-lg text-sm font-medium transition-all",
-                sort === opt.value ? "bg-white text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                sort === opt.value ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
               )}
             >
               {opt.label}

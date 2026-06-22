@@ -26,9 +26,12 @@ function SentimentDot({ type }) {
 
 function SpeakerBadge({ name }) {
   const colors = [
-    "bg-blue-100 text-blue-700", "bg-violet-100 text-violet-700",
-    "bg-teal-100 text-teal-700", "bg-orange-100 text-orange-700",
-    "bg-pink-100 text-pink-700", "bg-indigo-100 text-indigo-700",
+    "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300",
+    "bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300",
+    "bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300",
+    "bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300",
+    "bg-pink-100 dark:bg-pink-900/50 text-pink-700 dark:text-pink-300",
+    "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300",
   ]
   const idx = (name?.charCodeAt(0) || 0) % colors.length
   return (
@@ -81,7 +84,7 @@ export default function TranscriptDetail() {
           <Badge className={cn("text-xs", categoryColor(t.category))}>{t.category}</Badge>
           {t.customerAccount && (
             <Link to={`/accounts/${encodeURIComponent(t.customerAccount)}`}>
-              <Badge className="text-xs bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 cursor-pointer">
+              <Badge className="text-xs bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/60 hover:bg-blue-100 dark:hover:bg-blue-900/50 cursor-pointer">
                 {t.customerAccount}
               </Badge>
             </Link>
@@ -245,12 +248,12 @@ export default function TranscriptDetail() {
                   const name = u.speaker_name || u.speaker || "Unknown"
                   const sentType = u.sentimentType || u.sentiment_type || "neutral"
                   const bg = {
-                    positive: "bg-emerald-50 border-l-2 border-emerald-300",
-                    "very-positive": "bg-emerald-100 border-l-2 border-emerald-400",
-                    negative: "bg-red-50 border-l-2 border-red-300",
-                    "very-negative": "bg-red-100 border-l-2 border-red-400",
-                    "mixed-negative": "bg-amber-50 border-l-2 border-amber-300",
-                    "mixed-positive": "bg-blue-50 border-l-2 border-blue-200",
+                    positive: "bg-emerald-50 dark:bg-emerald-950/30 border-l-2 border-emerald-300 dark:border-emerald-700",
+                    "very-positive": "bg-emerald-100 dark:bg-emerald-950/50 border-l-2 border-emerald-400 dark:border-emerald-600",
+                    negative: "bg-red-50 dark:bg-red-950/30 border-l-2 border-red-300 dark:border-red-700",
+                    "very-negative": "bg-red-100 dark:bg-red-950/50 border-l-2 border-red-400 dark:border-red-600",
+                    "mixed-negative": "bg-amber-50 dark:bg-amber-950/30 border-l-2 border-amber-300 dark:border-amber-700",
+                    "mixed-positive": "bg-blue-50 dark:bg-blue-950/30 border-l-2 border-blue-200 dark:border-blue-800",
                     neutral: "",
                   }[sentType] || ""
 

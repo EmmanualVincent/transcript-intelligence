@@ -1,5 +1,5 @@
 import { useLocation, Link } from "react-router-dom"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Sun, Moon } from "lucide-react"
 
 const labels = {
   "": "Dashboard",
@@ -11,12 +11,12 @@ const labels = {
   "features": "Feature Gaps",
 }
 
-export function TopBar() {
+export function TopBar({ isDark, onToggleDark }) {
   const { pathname } = useLocation()
   const parts = pathname.split("/").filter(Boolean)
 
   return (
-    <header className="h-14 border-b border-border bg-white/80 backdrop-blur-sm sticky top-0 z-20 flex items-center px-6 gap-2">
+    <header className="h-14 border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-20 flex items-center px-6 gap-2">
       <Link to="/" className="text-muted-foreground hover:text-foreground text-sm transition-colors">
         Home
       </Link>
@@ -36,6 +36,16 @@ export function TopBar() {
           </span>
         )
       })}
+
+      <div className="ml-auto">
+        <button
+          onClick={onToggleDark}
+          className="h-8 w-8 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
+          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
+      </div>
     </header>
   )
 }

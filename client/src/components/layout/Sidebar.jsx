@@ -30,7 +30,7 @@ const nav = [
 export function Sidebar({ collapsed, onToggle }) {
   return (
     <aside className={cn(
-      "fixed inset-y-0 left-0 z-30 bg-white border-r border-border flex flex-col transition-[width] duration-300 ease-in-out",
+      "fixed inset-y-0 left-0 z-30 bg-background border-r border-border flex flex-col transition-[width] duration-300 ease-in-out",
       collapsed ? "w-16" : "w-60"
     )}>
       {/* Logo */}
