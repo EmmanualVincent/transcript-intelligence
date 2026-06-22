@@ -226,21 +226,6 @@ export default function RevenueRisk() {
         </Card>
       </div>
 
-      {/* Key insight */}
-      <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-        <Swords className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-semibold text-red-800">
-            SentinelShield is timing their outreach to your outages — and it's working
-          </p>
-          <p className="text-sm text-red-700 mt-0.5">
-            Every "Act Now" account has a competitor mention that appeared <em>after</em> the March Detect outage.
-            Competitors don't win on features — they win by being available when you aren't.
-            The 5 accounts below need a scheduled touchpoint this week, before their renewals land.
-          </p>
-        </div>
-      </div>
-
       {/* Tier sections */}
       <TierSection tier="act_now"  accounts={actNow} />
       <TierSection tier="act_soon" accounts={actSoon} />

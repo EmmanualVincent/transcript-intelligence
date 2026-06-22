@@ -104,8 +104,9 @@ export default function Incidents() {
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
         <Zap className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
         <p className="text-sm text-blue-800">
-          <span className="font-semibold">Product insight: </span>
-          One infrastructure failure took down threat monitoring for 6 hours, triggered 112 support tickets, threatened 4+ major renewals, and handed SentinelShield a sales window. No prior tool surfaced this end-to-end.
+          <span className="font-semibold">Incident summary: </span>
+          {total} calls across {Object.keys(roleBreakdown).length} conversation types — {totalChurnSignals} churn signal{totalChurnSignals !== 1 ? 's' : ''} detected
+          {affectedAccounts.length > 0 && <>, impacting {affectedAccounts.length} customer account{affectedAccounts.length !== 1 ? 's' : ''}</>}.
         </p>
       </div>
 

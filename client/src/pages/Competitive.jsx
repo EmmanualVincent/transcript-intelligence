@@ -123,15 +123,26 @@ export default function Competitive() {
       </div>
 
       {/* Insight */}
-      <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-start gap-3">
-        <Swords className="h-5 w-5 text-rose-600 flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-semibold text-rose-800">Key Finding: We're losing ground during outages, not on features</p>
-          <p className="text-sm text-rose-700 mt-0.5">
-            SentinelShield was brought up in 3+ customer escalations during the Detect Pipeline outage. Competitors gain ground not by being better — but by being available when we aren't.
-          </p>
-        </div>
-      </div>
+      {competitors.length > 0 && (() => {
+        const top = [...competitors].sort((a, b) => (b.mentionCount || 0) - (a.mentionCount || 0))[0]
+        const totalMentions = competitors.reduce((s, c) => s + (c.mentionCount || 0), 0)
+        return (
+          <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-start gap-3">
+            <Swords className="h-5 w-5 text-rose-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-rose-800">
+                {competitors.length} competitor{competitors.length !== 1 ? 's' : ''} mentioned across {totalMentions} instance{totalMentions !== 1 ? 's' : ''}
+              </p>
+              {top && (
+                <p className="text-sm text-rose-700 mt-0.5">
+                  {top.name} is the most frequently mentioned with {top.mentionCount} mention{top.mentionCount !== 1 ? 's' : ''}.
+                  Click any card below to explore the accounts and calls where they appear.
+                </p>
+              )}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Competitor cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
