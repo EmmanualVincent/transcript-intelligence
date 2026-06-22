@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(type\\(d\\), list\\(d.keys\\(\\)\\) if isinstance\\(d,dict\\) else d[:2]\\)\")",
+      "Bash(npm install *)",
+      "Bash(sudo rm -f /Users/emmanual/.npm/_cacache/content-v2/sha512/03/f0/0634c14dddcf1b3a5bd5f51ade31daefee3b2617d5c87c378277cefe23c44d83ab3bf01849c4cbbaf4d10c1c14891712a275589311daee470124fd620aa8)",
+      "Bash(npm cache *)",
+      "Bash(node src/index.js)",
+      "Bash(curl -s http://localhost:3001/health)",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s http://localhost:3001/api/overview)",
+      "Bash(curl -s http://localhost:3001/api/sentiment/timeline)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(json.dumps\\(w, indent=2\\)\\) for w in d['weeks'][:3]]\")",
+      "Bash(curl -s http://localhost:3001/api/sentiment/by-category)",
+      "Bash(curl -s http://localhost:3001/api/sentiment/divergence)",
+      "Bash(curl -s http://localhost:3001/api/sentiment/by-topic)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); [print\\(json.dumps\\(t\\)\\) for t in d['topics'][:5]]\")",
+      "Bash(curl -s http://localhost:3001/api/accounts)",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s \"http://localhost:3001/api/accounts/Northstar%20Pharma\")",
+      "Bash(curl -s http://localhost:3001/api/competitive)",
+      "Bash(curl -s http://localhost:3001/api/competitive/SentinelShield)",
+      "Bash(curl -s http://localhost:3001/api/incidents)",
+      "Bash(curl -s http://localhost:3001/api/features)",
+      "Bash(curl -s \"http://localhost:3001/api/transcripts?limit=3\")",
+      "Bash(curl -s \"http://localhost:3001/api/transcripts?callType=support&sentiment=lt:2.5&limit=5\")",
+      "Bash(curl -s \"http://localhost:3001/api/transcripts?limit=1\")",
+      "Bash(curl -s \"http://localhost:3001/api/accounts?riskLevel=critical\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d, indent=2\\)\\)\")"
+    ]
+  }
+}
