@@ -159,7 +159,7 @@ export default function Features() {
     <div className="p-6 max-w-7xl mx-auto space-y-5 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Customer Issues</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Feature Gaps</h1>
         <p className="text-muted-foreground text-sm mt-1">
           {totalIssues} signals raised by customers in external calls — feature gaps, concerns, and technical issues across {affectedAccounts} accounts
         </p>

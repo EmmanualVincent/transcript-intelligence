@@ -92,7 +92,7 @@ export default function Syncs() {
     <div className="p-6 max-w-7xl mx-auto space-y-5 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Engineering Syncs</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Internal Syncs</h1>
         <p className="text-muted-foreground text-sm mt-1">
           {total} internal calls — recurring blockers, team health, and decision tracking
         </p>
@@ -115,7 +115,7 @@ export default function Syncs() {
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={TrendingUp} label="Avg Team Sentiment" value={formatScore(avgSentiment)} sub="Across all internal calls" color={sentimentColor(avgSentiment)} />
-        <StatCard icon={Users} label="Internal Calls" value={total} sub="Engineering syncs & standups" />
+        <StatCard icon={Users} label="Internal Calls" value={total} sub="Internal syncs & standups" />
         <StatCard icon={AlertTriangle} label="Blocker Signals" value={concernCount} sub="Concerns + technical issues" color="text-amber-600" />
         <StatCard icon={ClipboardList} label="Action Items" value={actionItemCount} sub="Commitments made in syncs" />
       </div>
@@ -169,7 +169,7 @@ export default function Syncs() {
               <Hash className="h-4 w-4 text-muted-foreground" />
               Recurring Topics
             </CardTitle>
-            <CardDescription>Topics surfaced across 2+ engineering syncs</CardDescription>
+            <CardDescription>Topics surfaced across 2+ internal syncs</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2.5">
             {recurringTopics.map(({ topic, count, examples }) => (
@@ -277,7 +277,7 @@ export default function Syncs() {
       {/* Sync list */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle>All Engineering Syncs</CardTitle>
+          <CardTitle>All Internal Syncs</CardTitle>
           <CardDescription>{total} internal calls</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
