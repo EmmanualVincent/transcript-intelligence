@@ -13,6 +13,7 @@ import Incidents from "@/pages/Incidents"
 import Features from "@/pages/Features"
 import Actions from "@/pages/Actions"
 import RevenueRisk from "@/pages/RevenueRisk"
+import { ChatWidget } from "@/components/ChatWidget"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,6 +49,7 @@ export default function App() {
             </main>
           </div>
         </div>
+        <ChatWidget />
       </BrowserRouter>
     </QueryClientProvider>
   )
