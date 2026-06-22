@@ -70,22 +70,86 @@ router.get('/', (req, res) => {
   });
 });
 
+// Match a speaker name to a participant email to determine rep vs customer role.
+// Uses a 4-char prefix match on name parts against the email local part.
+function inferRole(speakerName, allEmails) {
+  if (!speakerName || !allEmails?.length) return null;
+  const nameParts = speakerName.toLowerCase().split(/\s+/).filter(p => p.length >= 2);
+  for (const email of allEmails) {
+    const local = email.split('@')[0].toLowerCase().replace(/[._-]/g, '');
+    const matched = nameParts.some(p => local.includes(p.slice(0, 4)));
+    if (matched) return email.includes('@aegiscloud.com') ? 'rep' : 'customer';
+  }
+  return null;
+}
+
 router.get('/:id', (req, res) => {
   const { transcripts } = getStore();
   const t = transcripts.find(x => x.id === req.params.id);
   if (!t) return res.status(404).json({ error: 'Transcript not found' });
 
-  // Speaker talk-time stats
+  const utterances = t.utterances || [];
+
+  // Speaker talk-time stats (base pass)
   const speakerStats = {};
-  for (const u of t.utterances || []) {
+  for (const u of utterances) {
     const sp = u.speaker_name || u.speaker || 'Unknown';
-    if (!speakerStats[sp]) speakerStats[sp] = { utteranceCount: 0, totalDuration: 0, sentiments: [] };
+    if (!speakerStats[sp]) speakerStats[sp] = { utteranceCount: 0, totalDuration: 0, sentiments: [], questionCount: 0 };
     speakerStats[sp].utteranceCount++;
     speakerStats[sp].totalDuration += (u.endTime || 0) - (u.time || 0);
     if (u.sentimentType) speakerStats[sp].sentiments.push(u.sentimentType);
+    if (u.sentence && u.sentence.trim().endsWith('?')) speakerStats[sp].questionCount++;
   }
 
-  res.json({ ...t, speakerStats });
+  // Longest uninterrupted monologue per speaker (consecutive utterance runs)
+  let curSpeaker = null;
+  let curStreak = 0;
+  for (const u of utterances) {
+    const sp = u.speaker_name || u.speaker || 'Unknown';
+    const dur = (u.endTime || 0) - (u.time || 0);
+    if (sp === curSpeaker) {
+      curStreak += dur;
+    } else {
+      if (curSpeaker !== null) {
+        speakerStats[curSpeaker].longestMonologue = Math.max(speakerStats[curSpeaker].longestMonologue || 0, curStreak);
+      }
+      curSpeaker = sp;
+      curStreak = dur;
+    }
+  }
+  if (curSpeaker !== null) {
+    speakerStats[curSpeaker].longestMonologue = Math.max(speakerStats[curSpeaker].longestMonologue || 0, curStreak);
+  }
+
+  // Speaker roles and speaker-switch count
+  let speakerSwitches = 0;
+  let prevSpeaker = null;
+  for (const u of utterances) {
+    const sp = u.speaker_name || u.speaker || 'Unknown';
+    if (prevSpeaker !== null && sp !== prevSpeaker) speakerSwitches++;
+    prevSpeaker = sp;
+  }
+
+  for (const name of Object.keys(speakerStats)) {
+    speakerStats[name].longestMonologue = speakerStats[name].longestMonologue || 0;
+    speakerStats[name].role = inferRole(name, t.allEmails);
+  }
+
+  // Conversation-level metrics
+  const durationMins = t.duration || 0;
+  const totalQuestions = Object.values(speakerStats).reduce((s, sp) => s + sp.questionCount, 0);
+  const totalTalkTime = Object.values(speakerStats).reduce((s, sp) => s + sp.totalDuration, 0);
+  const repTalkTime = Object.values(speakerStats).filter(sp => sp.role === 'rep').reduce((s, sp) => s + sp.totalDuration, 0);
+
+  const conversationMetrics = {
+    speakerSwitches,
+    speakerSwitchesPer5Min: durationMins > 0 ? speakerSwitches / (durationMins / 5) : 0,
+    totalQuestions,
+    questionRatePerHour: durationMins > 0 ? totalQuestions / (durationMins / 60) : 0,
+    repTalkPct: totalTalkTime > 0 ? (repTalkTime / totalTalkTime) * 100 : null,
+  };
+
+  res.json({ ...t, speakerStats, conversationMetrics });
 });
 
 module.exports = router;

@@ -8,7 +8,7 @@ import {
   cn, callTypeColor, categoryColor, sentimentBg, formatScore, formatDate,
   formatDuration, momentTypeBadge, momentTypeColor
 } from "@/lib/utils"
-import { ArrowLeft, Clock, Users, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react"
+import { ArrowLeft, Clock, Users, AlertTriangle, ChevronDown, ChevronUp, Check } from "lucide-react"
 import { useState } from "react"
 
 function SentimentDot({ type }) {
@@ -68,6 +68,14 @@ export default function TranscriptDetail() {
   const momentTypes = [...new Set((t.keyMoments || []).map(k => k.type))]
 
   const totalTalkTime = Object.values(t.speakerStats || {}).reduce((s, sp) => s + sp.totalDuration, 0)
+
+  const conversationMetrics = t.conversationMetrics || null
+  const isExternal = t.callType === 'external'
+  const isSupport = t.callType === 'support'
+  const showBenchmarks = isExternal || isSupport
+  // Rep target: 43% for external (sales/renewal), 35% for support
+  const repTarget = isSupport ? 35 : 43
+  const repFlagThreshold = isSupport ? 50 : 60
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-5 animate-fade-in">
@@ -138,29 +146,180 @@ export default function TranscriptDetail() {
             </Card>
           )}
 
-          {/* Speaker talk time */}
+          {/* Speaker Breakdown */}
           {Object.keys(t.speakerStats || {}).length > 0 && (
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">Speaker Breakdown</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2.5">
+              <CardContent className="space-y-3">
+                {/* Stacked talk-ratio bar with benchmark (external/support only) */}
+                {showBenchmarks && (() => {
+                  const sorted = Object.entries(t.speakerStats).sort((a, b) => {
+                    if (a[1].role === 'rep' && b[1].role !== 'rep') return -1
+                    if (b[1].role === 'rep' && a[1].role !== 'rep') return 1
+                    return b[1].totalDuration - a[1].totalDuration
+                  })
+                  const repPct = conversationMetrics?.repTalkPct ?? 0
+                  const overTalking = repPct > repFlagThreshold
+                  return (
+                    <div className="space-y-1.5 pb-1 border-b border-border">
+                      <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                        <span>Talk ratio</span>
+                        <span className={cn("font-semibold", overTalking ? "text-red-600" : "text-muted-foreground")}>
+                          Rep {repPct.toFixed(0)}% · Customer {(100 - repPct).toFixed(0)}%
+                        </span>
+                      </div>
+                      <div className="relative">
+                        <div className="flex h-4 rounded-md overflow-hidden">
+                          {sorted.map(([name, stats], i) => {
+                            const pct = totalTalkTime > 0 ? (stats.totalDuration / totalTalkTime * 100) : 0
+                            const bg = stats.role === 'rep'
+                              ? (overTalking ? 'bg-red-400' : 'bg-blue-500')
+                              : stats.role === 'customer'
+                              ? 'bg-emerald-500'
+                              : 'bg-gray-400'
+                            return (
+                              <div
+                                key={name}
+                                className={cn(bg, i > 0 && 'border-l border-white/40')}
+                                style={{ width: `${pct}%` }}
+                                title={`${name}: ${pct.toFixed(0)}%`}
+                              />
+                            )
+                          })}
+                        </div>
+                        {/* Benchmark marker */}
+                        <div
+                          className="absolute inset-y-0 w-px bg-gray-700/50"
+                          style={{ left: `${repTarget}%` }}
+                        >
+                          <div className="absolute -top-5 -translate-x-1/2 text-[9px] text-muted-foreground whitespace-nowrap">
+                            {repTarget}% target
+                          </div>
+                        </div>
+                      </div>
+                      {overTalking && (
+                        <div className="flex items-center gap-1.5 text-[11px] text-red-700 bg-red-50 border border-red-200 rounded-lg px-2.5 py-1.5 mt-1">
+                          <AlertTriangle className="h-3 w-3 flex-shrink-0" />
+                          Rep at {repPct.toFixed(0)}% — exceeds {repFlagThreshold}% threshold for {t.callType} calls
+                        </div>
+                      )}
+                    </div>
+                  )
+                })()}
+
+                {/* Per-speaker rows */}
                 {Object.entries(t.speakerStats)
                   .sort((a, b) => b[1].totalDuration - a[1].totalDuration)
                   .map(([name, stats]) => {
-                    const pct = totalTalkTime > 0 ? (stats.totalDuration / totalTalkTime * 100).toFixed(0) : 0
+                    const pct = totalTalkTime > 0 ? (stats.totalDuration / totalTalkTime * 100) : 0
+                    const monoSec = stats.longestMonologue || 0
+                    const monoFlag = stats.role === 'rep' && monoSec > 150
+                    const monoFmt = `${Math.floor(monoSec / 60)}:${String(Math.round(monoSec % 60)).padStart(2, '0')}`
+                    const barColor = stats.role === 'rep'
+                      ? 'bg-blue-500'
+                      : stats.role === 'customer'
+                      ? 'bg-emerald-500'
+                      : 'bg-primary/60'
                     return (
-                      <div key={name}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-medium">{name}</span>
-                          <span className="text-xs text-muted-foreground">{pct}%</span>
+                      <div key={name} className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                            <span className="text-xs font-medium truncate">{name}</span>
+                            {stats.role === 'rep' && (
+                              <span className="text-[9px] font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded flex-shrink-0">Rep</span>
+                            )}
+                            {stats.role === 'customer' && (
+                              <span className="text-[9px] font-semibold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded flex-shrink-0">Customer</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2.5 flex-shrink-0">
+                            {(stats.questionCount || 0) > 0 && (
+                              <span className="text-[10px] text-muted-foreground">
+                                {stats.questionCount} Q{stats.questionCount !== 1 ? 's' : ''}
+                              </span>
+                            )}
+                            {monoSec > 0 && (
+                              <span className={cn(
+                                "flex items-center gap-0.5 text-[10px]",
+                                monoFlag ? "text-amber-600 font-semibold" : "text-muted-foreground"
+                              )}>
+                                {monoFlag && <AlertTriangle className="h-2.5 w-2.5" />}
+                                {monoFmt} max
+                              </span>
+                            )}
+                            <span className="text-xs font-semibold w-8 text-right">{pct.toFixed(0)}%</span>
+                          </div>
                         </div>
                         <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                          <div className="h-full bg-primary/60 rounded-full" style={{ width: `${pct}%` }} />
+                          <div className={cn("h-full rounded-full", barColor)} style={{ width: `${pct}%` }} />
                         </div>
                       </div>
                     )
                   })}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Conversation Health — benchmarks for external/support calls */}
+          {showBenchmarks && conversationMetrics && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Conversation Health</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-2.5">
+                {/* Question rate */}
+                {(() => {
+                  const rate = conversationMetrics.questionRatePerHour
+                  const good = rate >= 18
+                  return (
+                    <div className={cn(
+                      "p-3 rounded-xl border space-y-1",
+                      good ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/60"
+                           : "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/60"
+                    )}>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Question Rate</p>
+                        {good
+                          ? <Check className="h-3 w-3 text-emerald-500" />
+                          : <AlertTriangle className="h-3 w-3 text-amber-500" />
+                        }
+                      </div>
+                      <p className={cn("text-xl font-black leading-none", good ? "text-emerald-700 dark:text-emerald-400" : "text-amber-700 dark:text-amber-400")}>
+                        {rate.toFixed(0)}<span className="text-xs font-normal">/hr</span>
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">target ≥18/hr</p>
+                      <p className="text-[10px] text-muted-foreground">{conversationMetrics.totalQuestions} total questions</p>
+                    </div>
+                  )
+                })()}
+
+                {/* Speaker switches */}
+                {(() => {
+                  const rate = conversationMetrics.speakerSwitchesPer5Min
+                  const good = rate >= 5
+                  return (
+                    <div className={cn(
+                      "p-3 rounded-xl border space-y-1",
+                      good ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/60"
+                           : "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800/60"
+                    )}>
+                      <div className="flex items-center justify-between">
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Interactivity</p>
+                        {good
+                          ? <Check className="h-3 w-3 text-emerald-500" />
+                          : <AlertTriangle className="h-3 w-3 text-amber-500" />
+                        }
+                      </div>
+                      <p className={cn("text-xl font-black leading-none", good ? "text-emerald-700 dark:text-emerald-400" : "text-amber-700 dark:text-amber-400")}>
+                        {rate.toFixed(1)}<span className="text-xs font-normal">/5m</span>
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">target ≥5/5min</p>
+                      <p className="text-[10px] text-muted-foreground">{conversationMetrics.speakerSwitches} total switches</p>
+                    </div>
+                  )
+                })()}
               </CardContent>
             </Card>
           )}
