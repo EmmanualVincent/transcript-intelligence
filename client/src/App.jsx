@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Sidebar } from "@/components/layout/Sidebar"
@@ -24,12 +25,14 @@ const queryClient = new QueryClient({
 })
 
 export default function App() {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <div className="flex min-h-screen bg-background">
-          <Sidebar />
-          <div className="flex-1 ml-60 flex flex-col min-h-screen">
+          <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(c => !c)} />
+          <div className={`flex-1 flex flex-col min-h-screen transition-[margin] duration-300 ease-in-out ${sidebarCollapsed ? "ml-16" : "ml-60"}`}>
             <main className="flex-1">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
