@@ -120,6 +120,14 @@ export function formatDate(dateStr) {
   })
 }
 
+export function daysAgo(dateStr) {
+  if (!dateStr) return null
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000)
+  if (diff === 0) return "today"
+  if (diff === 1) return "1 day ago"
+  return `${diff} days ago`
+}
+
 export function formatDuration(mins) {
   if (mins == null) return "—"
   const m = Math.round(mins)

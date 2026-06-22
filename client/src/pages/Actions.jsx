@@ -191,20 +191,6 @@ export default function Actions() {
         </p>
       </div>
 
-      {/* Insight banner */}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-        <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-semibold text-amber-800">
-            {data?.totalItems} commitments made across 100 calls — none tracked to completion
-          </p>
-          <p className="text-sm text-amber-700 mt-0.5">
-            {data?.highRiskItems} of these belong to critical or high-risk accounts. Every unresolved commitment
-            to an at-risk customer is an open churn door.
-          </p>
-        </div>
-      </div>
-
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard label="Total Commitments" value={data?.totalItems} sub="across 100 calls" accent="border-border" />

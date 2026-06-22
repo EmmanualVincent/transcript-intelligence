@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Select } from "@/components/ui/select"
-import { cn, riskColor, riskBarColor, formatScore, formatDate, sentimentColor } from "@/lib/utils"
+import { cn, riskColor, riskBarColor, formatScore, formatDate, daysAgo, sentimentColor } from "@/lib/utils"
 import { AlertTriangle, TrendingDown, Shield, ChevronRight, ArrowUpDown, AlertCircle, Clock, Eye, CheckCircle } from "lucide-react"
 
 const RISK_LEVELS = ["", "critical", "high", "medium", "low"]
@@ -75,24 +75,6 @@ export default function Accounts() {
         <p className="text-muted-foreground text-sm mt-1">Risk-scored accounts ranked by churn signals, sentiment, and competitive exposure</p>
       </div>
 
-      {/* Summary chips */}
-      <div className="flex gap-3 flex-wrap">
-        {[
-          { label: "Critical", color: "bg-red-100 text-red-700 border-red-200" },
-          { label: "High Risk", color: "bg-orange-100 text-orange-700 border-orange-200" },
-          { label: "Medium",   color: "bg-amber-100 text-amber-700 border-amber-200" },
-          { label: "Low",      color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-        ].map(({ label, color }) => (
-          <button
-            key={label}
-            onClick={() => setRiskLevel(riskLevel === label.toLowerCase().split(" ")[0] ? "" : label.toLowerCase().split(" ")[0])}
-            className={cn("px-4 py-2 rounded-lg border text-sm font-medium transition-all hover:shadow-sm", color)}
-          >
-            {data?.accounts?.filter(a => a.riskLevel === label.toLowerCase().split(" ")[0]).length || 0} {label}
-          </button>
-        ))}
-      </div>
-
       {/* Controls */}
       <Card>
         <CardContent className="p-4">
@@ -159,6 +141,11 @@ export default function Accounts() {
                           <span className="text-[10px] text-blue-600 font-medium">Renewal pending</span>
                         )}
                       </div>
+                      {account.lastCallDate && (
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          Last call: {daysAgo(account.lastCallDate)}
+                        </p>
+                      )}
                     </div>
                   </div>
 

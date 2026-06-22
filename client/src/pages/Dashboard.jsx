@@ -103,17 +103,6 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      {/* Alert banner */}
-      <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-        <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-semibold text-red-800">Critical: Detect Pipeline Outage Impact Detected</p>
-          <p className="text-sm text-red-700 mt-0.5">
-            {data.totalChurnSignals} churn signals across {data.totalTranscripts} calls · {data.criticalAccounts} enterprise accounts at critical risk · Competitors evaluating opportunities
-          </p>
-        </div>
-      </div>
-
       {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={MessageSquare} label="Total Calls" value={data.totalTranscripts} sub={`${data.dateRange?.start} – ${data.dateRange?.end}`} />
