@@ -28,4 +28,6 @@ export const api = {
   competitor: (name) => get(`/competitive/${encodeURIComponent(name)}`),
   incidents: () => get('/incidents'),
   features: () => get('/features'),
+  actions: () => get('/actions'),
+  revenueRisk: () => get('/revenue-risk'),
 }

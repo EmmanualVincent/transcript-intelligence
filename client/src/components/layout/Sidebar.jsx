@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router-dom"
+import { NavLink } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import {
   LayoutDashboard,
@@ -9,6 +9,8 @@ import {
   Zap,
   ShieldAlert,
   Lightbulb,
+  ClipboardList,
+  DollarSign,
 } from "lucide-react"
 
 const nav = [
@@ -19,6 +21,8 @@ const nav = [
   { to: "/accounts", label: "Account Health", icon: Building2 },
   { to: "/competitive", label: "Competitive Intel", icon: Swords },
   { to: "/features", label: "Feature Gaps", icon: Lightbulb },
+  { to: "/actions", label: "Action Items", icon: ClipboardList },
+  { to: "/revenue-risk", label: "Revenue at Risk", icon: DollarSign, badge: "hot" },
 ]
 
 export function Sidebar() {

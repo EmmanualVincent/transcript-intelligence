@@ -11,6 +11,8 @@ import AccountDetail from "@/pages/AccountDetail"
 import Competitive from "@/pages/Competitive"
 import Incidents from "@/pages/Incidents"
 import Features from "@/pages/Features"
+import Actions from "@/pages/Actions"
+import RevenueRisk from "@/pages/RevenueRisk"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,6 +42,8 @@ export default function App() {
                 <Route path="/accounts/:name" element={<AccountDetail />} />
                 <Route path="/competitive" element={<Competitive />} />
                 <Route path="/features" element={<Features />} />
+                <Route path="/actions" element={<Actions />} />
+                <Route path="/revenue-risk" element={<RevenueRisk />} />
               </Routes>
             </main>
           </div>

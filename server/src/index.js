@@ -19,6 +19,8 @@ app.use('/api/accounts',     require('./routes/accounts'));
 app.use('/api/competitive',  require('./routes/competitive'));
 app.use('/api/incidents',    require('./routes/incidents'));
 app.use('/api/features',     require('./routes/features'));
+app.use('/api/actions',       require('./routes/actions'));
+app.use('/api/revenue-risk', require('./routes/revenue-risk'));
 
 // Health check
 app.get('/health', (req, res) => {
