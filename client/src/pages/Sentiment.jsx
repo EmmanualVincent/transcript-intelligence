@@ -88,17 +88,6 @@ export default function Sentiment() {
         <p className="text-muted-foreground text-sm mt-1">How sentiment shifted across 101 calls — and what it means</p>
       </div>
 
-      {/* Insight callout */}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-        <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
-        <div>
-          <p className="text-sm font-semibold text-amber-800">The Detect Outage Signature</p>
-          <p className="text-sm text-amber-700 mt-0.5">
-            Sentiment crashed from ~3.5 to 1.4–2.4 during Mar 14–17. Support calls hit lowest point while external AM calls stayed artificially higher — indicating churn risk was being under-reported to leadership.
-          </p>
-        </div>
-      </div>
-
       {/* Timeline chart */}
       <Card>
         <CardHeader>
