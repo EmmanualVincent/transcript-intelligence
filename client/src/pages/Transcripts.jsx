@@ -113,7 +113,7 @@ export default function Transcripts() {
       )}
 
       {/* List */}
-      <div className="space-y-2">
+      <div className="space-y-6">
         {isLoading ? (
           [...Array(8)].map((_, i) => <Skeleton key={i} className="h-20" />)
         ) : (

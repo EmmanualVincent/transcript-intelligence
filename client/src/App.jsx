@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { Sidebar } from "@/components/layout/Sidebar"
-import { TopBar } from "@/components/layout/TopBar"
 import Dashboard from "@/pages/Dashboard"
 import Transcripts from "@/pages/Transcripts"
 import TranscriptDetail from "@/pages/TranscriptDetail"
@@ -31,7 +30,6 @@ export default function App() {
         <div className="flex min-h-screen bg-background">
           <Sidebar />
           <div className="flex-1 ml-60 flex flex-col min-h-screen">
-            <TopBar />
             <main className="flex-1">
               <Routes>
                 <Route path="/" element={<Dashboard />} />

@@ -182,7 +182,7 @@ export default function Actions() {
   const displayedOwners = showAll ? owners : owners.slice(0, 15)
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-5 animate-fade-in">
+    <div className="p-6 max-w-7xl mx-auto space-y-5 animate-fade-in">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Action Item Accountability</h1>

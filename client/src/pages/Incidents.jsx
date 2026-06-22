@@ -54,7 +54,7 @@ export default function Incidents() {
   const { thread = [], total, roleBreakdown = {}, totalChurnSignals, affectedAccounts = [] } = data || {}
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-5 animate-fade-in">
+    <div className="p-6 max-w-7xl mx-auto space-y-5 animate-fade-in">
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -112,7 +112,7 @@ export default function Incidents() {
       {/* Timeline */}
       <div className="relative">
         <div className="absolute left-4 top-0 bottom-0 w-px bg-border z-0" />
-        <div className="space-y-3">
+        <div className="space-y-6">
           {thread.map((t, i) => {
             const churnCount = (t.keyMoments || []).filter(k => k.type === "churn_signal").length
             return (
