@@ -113,12 +113,12 @@ export default function Transcripts() {
       )}
 
       {/* List */}
-      <div className="space-y-6">
+      <div className="flex flex-col gap-3">
         {isLoading ? (
           [...Array(8)].map((_, i) => <Skeleton key={i} className="h-20" />)
         ) : (
           data?.transcripts?.map(t => (
-            <Link key={t.id} to={`/transcripts/${t.id}`}>
+            <Link key={t.id} to={`/transcripts/${t.id}`} className="block">
               <Card className="hover:shadow-md hover:border-primary/30 transition-all cursor-pointer group">
                 <CardContent className="p-4">
                   <div className="flex items-start gap-4">

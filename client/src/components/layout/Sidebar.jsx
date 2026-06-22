@@ -57,7 +57,7 @@ export function Sidebar({ collapsed, onToggle }) {
             title={collapsed ? label : undefined}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors group",
+                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors group cursor-pointer",
                 isActive
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -96,7 +96,7 @@ export function Sidebar({ collapsed, onToggle }) {
         <button
           onClick={onToggle}
           className={cn(
-            "flex-shrink-0 h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors",
+            "flex-shrink-0 h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer",
             collapsed && "mx-auto"
           )}
         >
