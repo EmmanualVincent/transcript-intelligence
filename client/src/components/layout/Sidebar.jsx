@@ -28,7 +28,7 @@ const nav = [
   { to: "/actions", label: "Action Owners", icon: ClipboardList },
   { to: "/syncs", label: "Internal Syncs", icon: MonitorCheck },
 
-  { to: "/product-intel", label: "Product Intelligence", icon: Lightbulb },
+  { to: "/product-intel", label: "Product Intel", icon: Lightbulb },
   { to: "/product-health", label: "Product Health", icon: Activity },
 ]
 

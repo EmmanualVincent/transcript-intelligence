@@ -6,7 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn, formatDate, riskColor } from "@/lib/utils"
-import { Lightbulb, AlertTriangle, Wrench, Building2, ChevronRight, Heart } from "lucide-react"
+import { Lightbulb, AlertTriangle, Wrench, Building2, ChevronRight, Heart, ArrowUpDown } from "lucide-react"
+
+const RISK_WEIGHT = { critical: 4, high: 3, medium: 2, low: 1 }
+
+function getVisibleIssues(area, filter) {
+  if (filter === "all") return area.issues.filter(i => i.type !== "praise")
+  return area.issues.filter(i => i.type === filter)
+}
 
 const AREA_ACCENT = {
   Identity: { border: "border-l-violet-400", header: "text-violet-700", badge: "bg-violet-50 text-violet-700 border-violet-200", dot: "bg-violet-400" },
@@ -24,8 +31,16 @@ const SIGNAL_META = {
   praise:           { label: "Praise",           icon: Heart,          badge: "bg-emerald-50 text-emerald-700 border-emerald-200" },
 }
 
+const PRIORITY_META = {
+  critical: { label: "P1", badge: "bg-red-100 text-red-700 border-red-300",          title: "Critical churn risk" },
+  high:     { label: "P2", badge: "bg-orange-100 text-orange-700 border-orange-300",  title: "High churn risk"     },
+  medium:   { label: "P3", badge: "bg-yellow-100 text-yellow-700 border-yellow-300",  title: "Medium churn risk"   },
+  low:      { label: "P4", badge: "bg-gray-100 text-gray-500 border-gray-300",        title: "Low churn risk"      },
+  praise:   { label: "P5", badge: "bg-emerald-100 text-emerald-600 border-emerald-300", title: "Praise"            },
+}
+
 const FILTER_OPTIONS = [
-  { value: "all",              label: "All Issues" },
+  { value: "all",              label: "All" },
   { value: "feature_gap",      label: "Feature Gaps" },
   { value: "concern",          label: "Concerns" },
   { value: "technical_issue",  label: "Technical Issues" },
@@ -71,6 +86,14 @@ function IssueRow({ issue }) {
       <div className="flex-1 min-w-0">
         <p className="text-sm text-foreground leading-relaxed">{issue.text}</p>
         <div className="flex items-center gap-2 mt-2 flex-wrap">
+          {(() => {
+            const p = issue.type === "praise" ? PRIORITY_META.praise : PRIORITY_META[issue.riskLevel]
+            return p ? (
+              <Badge className={cn("text-[10px] font-bold border", p.badge)} title={p.title}>
+                {p.label}
+              </Badge>
+            ) : null
+          })()}
           <Badge className={cn("text-[10px] border", signal.badge)}>
             {signal.label}
           </Badge>
@@ -99,15 +122,15 @@ function IssueRow({ issue }) {
   )
 }
 
-function AreaCard({ area, filter }) {
+function AreaCard({ area, filter, sort }) {
   const accent = AREA_ACCENT[area.area] || AREA_ACCENT.Platform
-  const visible = area.issues.filter(i => {
-    if (filter === "all") return i.type !== "praise"
-    return i.type === filter
-  })
+  const visible = getVisibleIssues(area, filter)
   if (!visible.length) return null
 
   const isPraiseFilter = filter === "praise"
+  const atRiskCount = sort === "priority"
+    ? visible.filter(i => i.riskLevel === "critical" || i.riskLevel === "high").length
+    : 0
 
   return (
     <Card className={cn("border-l-4", accent.border)} id={area.area}>
@@ -126,7 +149,14 @@ function AreaCard({ area, filter }) {
               )}
             </CardDescription>
           </div>
-          <span className={cn("text-2xl font-black", accent.header)}>{visible.length}</span>
+          <div className="flex items-center gap-2">
+            {atRiskCount > 0 && (
+              <Badge className="text-[10px] border bg-red-50 text-red-700 border-red-200">
+                {atRiskCount} at-risk
+              </Badge>
+            )}
+            <span className={cn("text-2xl font-black", accent.header)}>{visible.length}</span>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-2 pt-0">
@@ -140,6 +170,7 @@ function AreaCard({ area, filter }) {
 
 export default function Features() {
   const [filter, setFilter] = useState("all")
+  const [sort, setSort] = useState("volume")
   const { data, isLoading } = useQuery({ queryKey: ["features"], queryFn: api.features })
 
   if (isLoading) return (
@@ -164,6 +195,15 @@ export default function Features() {
     : filter === "praise" ? totalPraise
     : totalTechIssues
 
+  const sortedAreas = [...areas].sort((a, b) => {
+    if (sort === "priority") {
+      const score = area => getVisibleIssues(area, filter)
+        .reduce((s, i) => s + (RISK_WEIGHT[i.riskLevel] || 0), 0)
+      return score(b) - score(a)
+    }
+    return getVisibleIssues(b, filter).length - getVisibleIssues(a, filter).length
+  })
+
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-5 animate-fade-in">
       {/* Header */}
@@ -173,21 +213,6 @@ export default function Features() {
           {totalIssues} issues raised by customers in external calls — feature gaps, concerns, and technical issues across {affectedAccounts} accounts · {totalPraise} praise moments from support & external calls
         </p>
       </div>
-
-      {/* Alert */}
-      {criticalRiskIssues > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-          <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-semibold text-red-800">
-              {criticalRiskIssues} issues raised by critical or high-risk accounts
-            </p>
-            <p className="text-sm text-red-700 mt-0.5">
-              These customers have active churn signals. Unresolved issues here directly increase the probability of losing the account.
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
@@ -222,41 +247,64 @@ export default function Features() {
         })}
       </div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-1.5 p-1 bg-muted rounded-xl w-fit">
-        {FILTER_OPTIONS.map(opt => {
-          const count = opt.value === "all" ? totalIssues
-            : opt.value === "feature_gap" ? totalFeatureGaps
-            : opt.value === "concern" ? totalConcerns
-            : opt.value === "praise" ? totalPraise
-            : totalTechIssues
-          return (
-            <button
-              key={opt.value}
-              onClick={() => setFilter(opt.value)}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5",
-                filter === opt.value
-                  ? "bg-white text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {opt.label}
-              <span className={cn(
-                "text-[11px] font-bold px-1.5 py-0.5 rounded-full",
-                filter === opt.value ? "bg-primary/10 text-primary" : "bg-muted-foreground/20 text-muted-foreground"
-              )}>
-                {count}
-              </span>
-            </button>
-          )
-        })}
+      {/* Filter tabs + Sort */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex gap-1.5 p-1 bg-muted rounded-xl w-fit">
+          {FILTER_OPTIONS.map(opt => {
+            const count = opt.value === "all" ? totalIssues
+              : opt.value === "feature_gap" ? totalFeatureGaps
+              : opt.value === "concern" ? totalConcerns
+              : opt.value === "praise" ? totalPraise
+              : totalTechIssues
+            return (
+              <button
+                key={opt.value}
+                onClick={() => setFilter(opt.value)}
+                className={cn(
+                  "px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5",
+                  filter === opt.value
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {opt.label}
+                <span className={cn(
+                  "text-[11px] font-bold px-1.5 py-0.5 rounded-full",
+                  filter === opt.value ? "bg-primary/10 text-primary" : "bg-muted-foreground/20 text-muted-foreground"
+                )}>
+                  {count}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">Sort:</span>
+          <div className="flex gap-1 p-0.5 bg-muted rounded-lg">
+            {[{ value: "volume", label: "Volume" }, { value: "priority", label: "Priority" }].map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => setSort(opt.value)}
+                className={cn(
+                  "px-2.5 py-1 rounded-md text-xs font-medium transition-all",
+                  sort === opt.value
+                    ? "bg-white text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Area cards */}
       <div className="space-y-4">
-        {areas.map(area => (
-          <AreaCard key={area.area} area={area} filter={filter} />
+        {sortedAreas.map(area => (
+          <AreaCard key={area.area} area={area} filter={filter} sort={sort} />
         ))}
       </div>
 
