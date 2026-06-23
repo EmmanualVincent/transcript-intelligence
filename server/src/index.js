@@ -3,6 +3,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { getStore } = require('./data/store');
 
 const app = express();
@@ -37,9 +38,11 @@ app.get('/health', (req, res) => {
   });
 });
 
-// 404 fallback
-app.use((req, res) => {
-  res.status(404).json({ error: `No route for ${req.method} ${req.path}` });
+// Serve built React frontend in production
+const clientDist = path.resolve(__dirname, '../../../client/dist');
+app.use(express.static(clientDist));
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(clientDist, 'index.html'));
 });
 
 // Eagerly initialize store so first request isn't slow
