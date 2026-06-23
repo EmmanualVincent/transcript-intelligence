@@ -31,4 +31,5 @@ export const api = {
   actions: () => get('/actions'),
   syncs: () => get('/syncs'),
   productHealth: () => get('/product-health'),
+  supportAnalytics: () => get('/support-analytics'),
 }

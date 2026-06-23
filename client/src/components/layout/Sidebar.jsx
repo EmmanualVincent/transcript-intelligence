@@ -11,6 +11,7 @@ import {
   ClipboardList,
   MonitorCheck,
   Activity,
+  Headphones,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
@@ -25,6 +26,7 @@ const nav = [
   { to: "/actions", label: "Action Owners", icon: ClipboardList },
   { to: "/syncs", label: "Internal Syncs", icon: MonitorCheck },
   { to: "/product-health", label: "Product Health", icon: Activity },
+  { to: "/support-analytics", label: "Support Analytics", icon: Headphones },
 ]
 
 export function Sidebar({ collapsed, onToggle }) {

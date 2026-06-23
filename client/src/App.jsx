@@ -14,6 +14,7 @@ import Features from "@/pages/Features"
 import Actions from "@/pages/Actions"
 import Syncs from "@/pages/Syncs"
 import ProductHealth from "@/pages/ProductHealth"
+import SupportAnalytics from "@/pages/SupportAnalytics"
 import { ChatWidget } from "@/components/ChatWidget"
 
 const queryClient = new QueryClient({
@@ -59,6 +60,7 @@ export default function App() {
                 <Route path="/actions" element={<Actions />} />
                 <Route path="/syncs" element={<Syncs />} />
                 <Route path="/product-health" element={<ProductHealth />} />
+                <Route path="/support-analytics" element={<SupportAnalytics />} />
               </Routes>
             </main>
           </div>
