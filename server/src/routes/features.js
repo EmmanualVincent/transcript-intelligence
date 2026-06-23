@@ -6,6 +6,7 @@ const { getStore } = require('../data/store');
 const router = Router();
 
 const SIGNAL_TYPES = ['feature_gap', 'concern', 'technical_issue'];
+const PRAISE_TYPES = ['praise'];
 
 function inferProductArea(text) {
   const t = text.toLowerCase();
@@ -29,14 +30,22 @@ router.get('/', (req, res) => {
 
   const RISK_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
 
-  // Collect all customer-raised signals from external calls only
+  // Collect all customer-raised signals
+  // feature_gap/concern/technical_issue: external calls only
+  // praise: external + support calls
   const issues = [];
 
   for (const t of transcripts) {
-    if (t.callType !== 'external') continue;
+    const isExternal = t.callType === 'external';
+    const isSupport = t.callType === 'support';
+    if (!isExternal && !isSupport) continue;
 
     for (const km of t.keyMoments || []) {
-      if (!SIGNAL_TYPES.includes(km.type)) continue;
+      const isPraise = PRAISE_TYPES.includes(km.type);
+      const isIssue = SIGNAL_TYPES.includes(km.type);
+
+      if (!isPraise && !isIssue) continue;
+      if (isIssue && !isExternal) continue; // issues from external only
 
       const area = inferProductArea(km.text || '');
       const acctRisk = riskByAccount[t.customerAccount] || null;
@@ -47,6 +56,7 @@ router.get('/', (req, res) => {
         text: km.text || '',
         speaker: km.speaker || null,
         account: t.customerAccount || null,
+        callType: t.callType,
         riskLevel: acctRisk?.riskLevel || null,
         riskScore: acctRisk?.riskScore || 0,
         transcriptId: t.id,
@@ -73,6 +83,7 @@ router.get('/', (req, res) => {
         featureGaps: 0,
         concerns: 0,
         technicalIssues: 0,
+        praise: 0,
         issues: [],
       };
     }
@@ -81,6 +92,7 @@ router.get('/', (req, res) => {
     if (issue.type === 'feature_gap') entry.featureGaps++;
     if (issue.type === 'concern') entry.concerns++;
     if (issue.type === 'technical_issue') entry.technicalIssues++;
+    if (issue.type === 'praise') entry.praise++;
     entry.issues.push(issue);
   }
 
@@ -88,20 +100,23 @@ router.get('/', (req, res) => {
     .sort((a, b) => b.totalIssues - a.totalIssues);
 
   // Summary stats
-  const totalIssues = issues.length;
+  const nonPraise = issues.filter(i => !PRAISE_TYPES.includes(i.type));
+  const totalIssues = nonPraise.length;
   const totalFeatureGaps = issues.filter(i => i.type === 'feature_gap').length;
   const totalConcerns = issues.filter(i => i.type === 'concern').length;
   const totalTechIssues = issues.filter(i => i.type === 'technical_issue').length;
-  const criticalRiskIssues = issues.filter(i => i.riskLevel === 'critical' || i.riskLevel === 'high').length;
+  const totalPraise = issues.filter(i => i.type === 'praise').length;
+  const criticalRiskIssues = nonPraise.filter(i => i.riskLevel === 'critical' || i.riskLevel === 'high').length;
 
   // Unique accounts affected
-  const affectedAccounts = [...new Set(issues.map(i => i.account).filter(Boolean))];
+  const affectedAccounts = [...new Set(nonPraise.map(i => i.account).filter(Boolean))];
 
   res.json({
     totalIssues,
     totalFeatureGaps,
     totalConcerns,
     totalTechIssues,
+    totalPraise,
     criticalRiskIssues,
     affectedAccounts: affectedAccounts.length,
     areas,

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn, formatDate, riskColor } from "@/lib/utils"
-import { Lightbulb, AlertTriangle, Wrench, Building2, ChevronRight } from "lucide-react"
+import { Lightbulb, AlertTriangle, Wrench, Building2, ChevronRight, Heart } from "lucide-react"
 
 const AREA_ACCENT = {
   Identity: { border: "border-l-violet-400", header: "text-violet-700", badge: "bg-violet-50 text-violet-700 border-violet-200", dot: "bg-violet-400" },
@@ -21,6 +21,7 @@ const SIGNAL_META = {
   feature_gap:      { label: "Feature Gap",      icon: Lightbulb,    badge: "bg-violet-50 text-violet-700 border-violet-200" },
   concern:          { label: "Customer Concern",  icon: AlertTriangle, badge: "bg-amber-50 text-amber-700 border-amber-200"  },
   technical_issue:  { label: "Technical Issue",  icon: Wrench,        badge: "bg-red-50 text-red-700 border-red-200"         },
+  praise:           { label: "Praise",           icon: Heart,          badge: "bg-emerald-50 text-emerald-700 border-emerald-200" },
 }
 
 const FILTER_OPTIONS = [
@@ -28,6 +29,7 @@ const FILTER_OPTIONS = [
   { value: "feature_gap",      label: "Feature Gaps" },
   { value: "concern",          label: "Concerns" },
   { value: "technical_issue",  label: "Technical Issues" },
+  { value: "praise",           label: "Praise" },
 ]
 
 function StatCard({ label, value, sub, color, icon: Icon }) {
@@ -62,6 +64,7 @@ function IssueRow({ issue }) {
         "h-4 w-4 flex-shrink-0 mt-0.5",
         issue.type === "feature_gap" ? "text-violet-500"
           : issue.type === "concern" ? "text-amber-500"
+          : issue.type === "praise" ? "text-emerald-500"
           : "text-red-500"
       )} />
 
@@ -98,8 +101,13 @@ function IssueRow({ issue }) {
 
 function AreaCard({ area, filter }) {
   const accent = AREA_ACCENT[area.area] || AREA_ACCENT.Platform
-  const visible = area.issues.filter(i => filter === "all" || i.type === filter)
+  const visible = area.issues.filter(i => {
+    if (filter === "all") return i.type !== "praise"
+    return i.type === filter
+  })
   if (!visible.length) return null
+
+  const isPraiseFilter = filter === "praise"
 
   return (
     <Card className={cn("border-l-4", accent.border)} id={area.area}>
@@ -108,7 +116,7 @@ function AreaCard({ area, filter }) {
           <div>
             <CardTitle className={cn("text-base", accent.header)}>{area.area}</CardTitle>
             <CardDescription className="mt-0.5">
-              {visible.length} issue{visible.length !== 1 ? "s" : ""}
+              {visible.length} {isPraiseFilter ? "moment" : "issue"}{visible.length !== 1 ? "s" : ""}
               {filter === "all" && (
                 <span className="ml-2 text-xs">
                   {area.featureGaps > 0 && <span>{area.featureGaps} gaps · </span>}
@@ -137,8 +145,8 @@ export default function Features() {
   if (isLoading) return (
     <div className="p-6 space-y-5">
       <Skeleton className="h-8 w-72" />
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-28" />)}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-28" />)}
       </div>
       {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-64" />)}
     </div>
@@ -146,13 +154,14 @@ export default function Features() {
 
   const {
     totalIssues = 0, totalFeatureGaps = 0, totalConcerns = 0,
-    totalTechIssues = 0, criticalRiskIssues = 0, affectedAccounts = 0,
+    totalTechIssues = 0, totalPraise = 0, criticalRiskIssues = 0, affectedAccounts = 0,
     areas = [],
   } = data || {}
 
   const visibleCount = filter === "all" ? totalIssues
     : filter === "feature_gap" ? totalFeatureGaps
     : filter === "concern" ? totalConcerns
+    : filter === "praise" ? totalPraise
     : totalTechIssues
 
   return (
@@ -161,7 +170,7 @@ export default function Features() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Feature Gaps</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          {totalIssues} signals raised by customers in external calls — feature gaps, concerns, and technical issues across {affectedAccounts} accounts
+          {totalIssues} issues raised by customers in external calls — feature gaps, concerns, and technical issues across {affectedAccounts} accounts · {totalPraise} praise moments from support & external calls
         </p>
       </div>
 
@@ -181,20 +190,22 @@ export default function Features() {
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Lightbulb}      label="Feature Gaps"      value={totalFeatureGaps}    sub="Functionality customers asked for"       color="text-violet-600" />
-        <StatCard icon={AlertTriangle}  label="Customer Concerns" value={totalConcerns}        sub="Pain points raised on calls"            color="text-amber-600"  />
-        <StatCard icon={Wrench}         label="Technical Issues"  value={totalTechIssues}      sub="Product problems named by customers"     color="text-red-600"    />
-        <StatCard icon={Building2}      label="Accounts Affected" value={affectedAccounts}     sub={`${criticalRiskIssues} on at-risk accounts`} color="text-foreground" />
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <StatCard icon={Lightbulb}      label="Feature Gaps"      value={totalFeatureGaps}    sub="Functionality customers asked for"            color="text-violet-600" />
+        <StatCard icon={AlertTriangle}  label="Customer Concerns" value={totalConcerns}        sub="Pain points raised on calls"                 color="text-amber-600"  />
+        <StatCard icon={Wrench}         label="Technical Issues"  value={totalTechIssues}      sub="Product problems named by customers"          color="text-red-600"    />
+        <StatCard icon={Heart}          label="Praise"            value={totalPraise}          sub="From support & external calls"                color="text-emerald-600" />
+        <StatCard icon={Building2}      label="Accounts Affected" value={affectedAccounts}     sub={`${criticalRiskIssues} on at-risk accounts`}  color="text-foreground" />
       </div>
 
       {/* Area nav */}
       <div className="flex gap-2 flex-wrap">
         {areas.map(area => {
           const accent = AREA_ACCENT[area.area] || AREA_ACCENT.Platform
-          const count = filter === "all" ? area.totalIssues
+          const count = filter === "all" ? (area.totalIssues - (area.praise || 0))
             : filter === "feature_gap" ? area.featureGaps
             : filter === "concern" ? area.concerns
+            : filter === "praise" ? (area.praise || 0)
             : area.technicalIssues
           if (!count) return null
           return (
@@ -217,6 +228,7 @@ export default function Features() {
           const count = opt.value === "all" ? totalIssues
             : opt.value === "feature_gap" ? totalFeatureGaps
             : opt.value === "concern" ? totalConcerns
+            : opt.value === "praise" ? totalPraise
             : totalTechIssues
           return (
             <button
@@ -250,7 +262,7 @@ export default function Features() {
 
       {visibleCount === 0 && (
         <div className="text-center py-12 text-muted-foreground text-sm">
-          No {filter === "all" ? "issues" : SIGNAL_META[filter]?.label.toLowerCase() + "s"} found.
+          No {filter === "all" ? "issues" : filter === "praise" ? "praise moments" : SIGNAL_META[filter]?.label.toLowerCase() + "s"} found.
         </div>
       )}
     </div>
