@@ -8,13 +8,36 @@ const router = Router();
 // GET /api/competitive
 router.get('/', (req, res) => {
   const { competitors } = getStore();
+
+  // Build per-account reasons aggregated across all competitors
+  const accountReasonsMap = {};
+  for (const comp of competitors) {
+    for (const ctx of comp.contexts) {
+      if (!ctx.account || !ctx.momentText) continue;
+      if (!accountReasonsMap[ctx.account]) accountReasonsMap[ctx.account] = [];
+      accountReasonsMap[ctx.account].push({
+        competitor: comp.name,
+        momentText: ctx.momentText,
+        transcriptId: ctx.transcriptId,
+        transcriptTitle: ctx.transcriptTitle,
+        date: ctx.date,
+        sentimentScore: ctx.sentimentScore,
+      });
+    }
+  }
+
+  const accountReasons = Object.entries(accountReasonsMap)
+    .map(([account, reasons]) => ({ account, reasons }))
+    .sort((a, b) => b.reasons.length - a.reasons.length);
+
   // Strip verbose contexts from list view
   const list = competitors.map(({ contexts, ...c }) => ({
     ...c,
     contextCount: contexts.length,
     topContext: contexts[0] || null,
   }));
-  res.json({ competitors: list, total: list.length });
+
+  res.json({ competitors: list, total: list.length, accountReasons });
 });
 
 // GET /api/competitive/:name

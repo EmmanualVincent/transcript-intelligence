@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn, formatScore, sentimentBg, callTypeColor, formatDate } from "@/lib/utils"
-import { Swords, ArrowRight, ChevronRight, TrendingDown } from "lucide-react"
+import { Swords, ArrowRight, ChevronRight, TrendingDown, ShieldCheck } from "lucide-react"
 
 const COMPETITOR_COLORS = {
   SentinelShield: "from-red-500 to-rose-600",
@@ -98,6 +98,7 @@ function ContextCard({ ctx }) {
 
 export default function Competitive() {
   const [selected, setSelected] = useState(null)
+  const [expandedAccount, setExpandedAccount] = useState(null)
 
   const { data, isLoading } = useQuery({ queryKey: ["competitive"], queryFn: api.competitive })
   const { data: detail } = useQuery({
@@ -107,6 +108,7 @@ export default function Competitive() {
   })
 
   const competitors = data?.competitors || []
+  const accountReasons = data?.accountReasons || []
 
   if (isLoading) return (
     <div className="p-6 space-y-4">
@@ -182,39 +184,142 @@ export default function Competitive() {
         </Card>
       )}
 
-      {/* Affected accounts summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Accounts Evaluating Competitors</CardTitle>
-          <CardDescription>Accounts that mentioned competitors in their calls — high priority for retention outreach</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {[...new Set(competitors.flatMap(c => c.affectedAccounts || []))].map(account => {
-              const mentionedBy = competitors.filter(c => (c.affectedAccounts || []).includes(account)).map(c => c.name)
-              return (
-                <Link
-                  key={account}
-                  to={`/accounts/${encodeURIComponent(account)}`}
-                  className="flex items-center gap-3 p-3 rounded-lg border hover:border-primary/40 hover:bg-muted/50 transition-all group"
-                >
-                  <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold flex-shrink-0">{account?.charAt(0)}</div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold group-hover:text-primary transition-colors">{account}</p>
-                    <div className="flex gap-1 mt-0.5">
-                      {mentionedBy.map(c => (
-                        <Badge key={c} className="text-[10px] bg-rose-50 text-rose-700 border-rose-200">{c}</Badge>
-                      ))}
-                    </div>
+      {/* Accounts split by sentiment */}
+      {(() => {
+        const atRisk = accountReasons
+          .map(({ account, reasons }) => ({
+            account,
+            reasons: reasons.filter(r => r.sentimentScore == null || r.sentimentScore < 3.5),
+          }))
+          .filter(a => a.reasons.length > 0)
+
+        const positive = accountReasons
+          .map(({ account, reasons }) => ({
+            account,
+            reasons: reasons.filter(r => r.sentimentScore != null && r.sentimentScore >= 3.5),
+          }))
+          .filter(a => a.reasons.length > 0)
+
+        function AccountRow({ account, reasons, variant }) {
+          const isNeg = variant === "negative"
+          const isExpanded = expandedAccount === account
+          const mentionedBy = [...new Set(reasons.map(r => r.competitor))]
+          const primary = reasons[0]
+          const extra = reasons.slice(1)
+          return (
+            <div className="rounded-xl border overflow-hidden">
+              <div className="flex items-center gap-3 p-3">
+                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold flex-shrink-0">
+                  {account?.charAt(0)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Link
+                      to={`/accounts/${encodeURIComponent(account)}`}
+                      className="text-sm font-semibold hover:text-primary transition-colors"
+                    >
+                      {account}
+                    </Link>
+                    {mentionedBy.map(c => (
+                      <Badge
+                        key={c}
+                        className={cn("text-[10px]", isNeg
+                          ? "bg-rose-50 text-rose-700 border-rose-200"
+                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        )}
+                      >
+                        {c}
+                      </Badge>
+                    ))}
                   </div>
-                  <TrendingDown className="h-4 w-4 text-red-500 flex-shrink-0" />
-                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </Link>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
+                  {primary?.momentText && (
+                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-2">
+                      <span className="font-medium text-foreground">{primary.competitor}:</span>{" "}
+                      {primary.momentText}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {isNeg
+                    ? <TrendingDown className="h-4 w-4 text-red-500" />
+                    : <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                  }
+                  {extra.length > 0 && (
+                    <button
+                      onClick={() => setExpandedAccount(isExpanded ? null : account)}
+                      className="flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {isExpanded ? "less" : `+${extra.length} more`}
+                      <ChevronRight className={cn("h-3 w-3 transition-transform", isExpanded && "rotate-90")} />
+                    </button>
+                  )}
+                </div>
+              </div>
+              {isExpanded && extra.length > 0 && (
+                <div className="border-t bg-muted/20 px-3 pb-3 pt-2 space-y-2">
+                  {extra.map((r, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <Badge
+                        className={cn("text-[10px] flex-shrink-0 mt-0.5", isNeg
+                          ? "bg-rose-50 text-rose-700 border-rose-200"
+                          : "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        )}
+                      >
+                        {r.competitor}
+                      </Badge>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{r.momentText}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        }
+
+        return (
+          <>
+            {/* At-risk: negative sentiment */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <TrendingDown className="h-4 w-4 text-red-500" />
+                  Accounts Evaluating Competitors
+                  <span className="ml-1 px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-bold">{atRisk.length}</span>
+                </CardTitle>
+                <CardDescription>Accounts with negative signals around competitor evaluation — high priority for retention outreach</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {atRisk.map(({ account, reasons }) => (
+                    <AccountRow key={account} account={account} reasons={reasons} variant="negative" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Positive: evaluated competitors but stayed */}
+            {positive.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                    Competitors Mentioned — Positive Outcome
+                    <span className="ml-1 px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">{positive.length}</span>
+                  </CardTitle>
+                  <CardDescription>Accounts that considered competitors but expressed confidence in Aegis</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {positive.map(({ account, reasons }) => (
+                      <AccountRow key={account} account={account} reasons={reasons} variant="positive" />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
+        )
+      })()}
     </div>
   )
 }
