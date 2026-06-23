@@ -116,7 +116,7 @@ const DIST_COLORS = {
   "<10/hr": "#ef4444", "10-18/hr": "#fbbf24", "18-25/hr": "#34d399", ">25/hr": "#059669",
 }
 
-function DistChart({ data, title, description, referenceLabel }) {
+function DistChart({ data, title, description, referenceLabel, height = 160 }) {
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -124,7 +124,7 @@ function DistChart({ data, title, description, referenceLabel }) {
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={160}>
+        <ResponsiveContainer width="100%" height={height}>
           <BarChart data={data} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
             <XAxis dataKey="label" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
             <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} allowDecimals={false} />
@@ -410,44 +410,42 @@ export default function SupportAnalytics() {
         ))}
       </div>
 
-      {/* Trend chart + Talk ratio distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Weekly sentiment trend */}
-        <Card className="lg:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Weekly Sentiment & Call Volume</CardTitle>
-            <CardDescription>Average customer sentiment per week with call volume bars</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={220}>
-              <ComposedChart data={weeklyTrend} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="label" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
-                <YAxis yAxisId="sentiment" domain={[1, 5]} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} tickCount={5} />
-                <YAxis yAxisId="calls" orientation="right" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{ borderRadius: "8px", border: "1px solid hsl(var(--border))", fontSize: "12px" }}
-                  formatter={(v, name) => {
-                    if (name === "Calls") return [v, "Calls"]
-                    return [v?.toFixed(2), name]
-                  }}
-                />
-                <Bar yAxisId="calls" dataKey="callCount" name="Calls" fill="hsl(var(--muted))" radius={[3, 3, 0, 0]} />
-                <Line yAxisId="sentiment" type="monotone" dataKey="avgSentiment" name="Avg Sentiment" stroke="#0ea5e9" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} connectNulls />
-                <ReferenceLine yAxisId="sentiment" y={3.5} stroke="#10b981" strokeDasharray="4 2" strokeOpacity={0.6} label={{ value: "Target", position: "insideTopRight", fontSize: 10, fill: "#10b981" }} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* Weekly sentiment trend */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Weekly Sentiment & Call Volume</CardTitle>
+          <CardDescription>Average customer sentiment per week with call volume bars</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={220}>
+            <ComposedChart data={weeklyTrend} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="label" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+              <YAxis yAxisId="sentiment" domain={[1, 5]} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} tickCount={5} />
+              <YAxis yAxisId="calls" orientation="right" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} allowDecimals={false} />
+              <Tooltip
+                contentStyle={{ borderRadius: "8px", border: "1px solid hsl(var(--border))", fontSize: "12px" }}
+                formatter={(v, name) => {
+                  if (name === "Calls") return [v, "Calls"]
+                  return [v?.toFixed(2), name]
+                }}
+              />
+              <Bar yAxisId="calls" dataKey="callCount" name="Calls" fill="hsl(var(--muted))" radius={[3, 3, 0, 0]} />
+              <Line yAxisId="sentiment" type="monotone" dataKey="avgSentiment" name="Avg Sentiment" stroke="#0ea5e9" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} connectNulls />
+              <ReferenceLine yAxisId="sentiment" y={3.5} stroke="#10b981" strokeDasharray="4 2" strokeOpacity={0.6} label={{ value: "Target", position: "insideTopRight", fontSize: 10, fill: "#10b981" }} />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
 
-        {/* Talk ratio distribution */}
-        <DistChart
-          data={talkRatioDistribution}
-          title="Talk Ratio Distribution"
-          description="How much reps talked per call"
-          referenceLabel="Green = under target · Red = rep over-talking"
-        />
-      </div>
+      {/* Talk ratio distribution — full width */}
+      <DistChart
+        data={talkRatioDistribution}
+        title="Talk Ratio Distribution"
+        description="How much reps talked per call"
+        referenceLabel="Green = under target · Red = rep over-talking"
+        height={220}
+      />
 
       {/* Duration + Q-rate distributions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
