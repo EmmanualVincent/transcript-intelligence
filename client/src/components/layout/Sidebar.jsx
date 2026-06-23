@@ -20,13 +20,16 @@ const nav = [
   { to: "/", label: "Overview", icon: LayoutDashboard },
   { to: "/transcripts", label: "Transcripts", icon: FileText },
   { to: "/sentiment", label: "Sentiment", icon: TrendingUp },
+
   { to: "/accounts", label: "Account Health", icon: Building2 },
+  { to: "/support-analytics", label: "Support Analytics", icon: Headphones },
   { to: "/competitive", label: "Competitive Intel", icon: Swords },
-  { to: "/features", label: "Feature Gaps", icon: Lightbulb },
+  
   { to: "/actions", label: "Action Owners", icon: ClipboardList },
   { to: "/syncs", label: "Internal Syncs", icon: MonitorCheck },
+
+  { to: "/product-intel", label: "Product Intelligence", icon: Lightbulb },
   { to: "/product-health", label: "Product Health", icon: Activity },
-  { to: "/support-analytics", label: "Support Analytics", icon: Headphones },
 ]
 
 export function Sidebar({ collapsed, onToggle }) {

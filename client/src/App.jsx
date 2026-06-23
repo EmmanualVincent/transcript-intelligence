@@ -56,7 +56,7 @@ export default function App() {
                 <Route path="/accounts" element={<Accounts />} />
                 <Route path="/accounts/:name" element={<AccountDetail />} />
                 <Route path="/competitive" element={<Competitive />} />
-                <Route path="/features" element={<Features />} />
+                <Route path="/product-intel" element={<Features />} />
                 <Route path="/actions" element={<Actions />} />
                 <Route path="/syncs" element={<Syncs />} />
                 <Route path="/product-health" element={<ProductHealth />} />

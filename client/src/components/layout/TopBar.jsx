@@ -8,7 +8,7 @@ const labels = {
   "sentiment": "Sentiment Analysis",
   "accounts": "Account Health",
   "competitive": "Competitive Intelligence",
-  "features": "Feature Gaps",
+  "product-intel": "Product Intelligence",
 }
 
 export function TopBar({ isDark, onToggleDark }) {
