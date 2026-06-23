@@ -124,28 +124,6 @@ export default function Competitive() {
         <p className="text-muted-foreground text-sm mt-1">Competitor mentions across all 101 calls — when, where, and by whom</p>
       </div>
 
-      {/* Insight */}
-      {competitors.length > 0 && (() => {
-        const top = [...competitors].sort((a, b) => (b.mentionCount || 0) - (a.mentionCount || 0))[0]
-        const totalMentions = competitors.reduce((s, c) => s + (c.mentionCount || 0), 0)
-        return (
-          <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 flex items-start gap-3">
-            <Swords className="h-5 w-5 text-rose-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-semibold text-rose-800">
-                {competitors.length} competitor{competitors.length !== 1 ? 's' : ''} mentioned across {totalMentions} instance{totalMentions !== 1 ? 's' : ''}
-              </p>
-              {top && (
-                <p className="text-sm text-rose-700 mt-0.5">
-                  {top.name} is the most frequently mentioned with {top.mentionCount} mention{top.mentionCount !== 1 ? 's' : ''}.
-                  Click any card below to explore the accounts and calls where they appear.
-                </p>
-              )}
-            </div>
-          </div>
-        )
-      })()}
-
       {/* Competitor cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {competitors.map(comp => (
