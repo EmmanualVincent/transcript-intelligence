@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { api } from "@/api"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -67,13 +67,19 @@ function StatCard({ label, value, sub, color, icon: Icon }) {
 }
 
 function IssueRow({ issue }) {
+  const navigate = useNavigate()
   const signal = SIGNAL_META[issue.type] || SIGNAL_META.concern
   const SignalIcon = signal.icon
 
+  // Not a <Link> because this row contains a nested account <Link> — two
+  // nested <a> tags is invalid HTML and breaks React hydration.
   return (
-    <Link
-      to={`/transcripts/${issue.transcriptId}`}
-      className="group flex items-start gap-3 p-3.5 rounded-lg border hover:border-primary/40 hover:bg-muted/30 transition-all"
+    <div
+      role="link"
+      tabIndex={0}
+      onClick={() => navigate(`/transcripts/${issue.transcriptId}`)}
+      onKeyDown={e => e.key === "Enter" && navigate(`/transcripts/${issue.transcriptId}`)}
+      className="group flex items-start gap-3 p-3.5 rounded-lg border hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer"
     >
       <SignalIcon className={cn(
         "h-4 w-4 flex-shrink-0 mt-0.5",
@@ -118,7 +124,7 @@ function IssueRow({ issue }) {
       </div>
 
       <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary flex-shrink-0 mt-0.5 transition-colors" />
-    </Link>
+    </div>
   )
 }
 
