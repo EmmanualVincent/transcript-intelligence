@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn, formatScore, riskColor } from "@/lib/utils"
 import {
   AlertTriangle, TrendingDown, Users, Zap, MessageSquare,
-  ArrowRight, Shield, Target, Lightbulb
+  ArrowRight, Target, Lightbulb
 } from "lucide-react"
 import {
   PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip

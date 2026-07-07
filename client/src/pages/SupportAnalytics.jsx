@@ -5,14 +5,14 @@ import { api } from "@/api"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn, formatScore, formatDate, formatDuration, callTypeColor } from "@/lib/utils"
+import { cn, formatScore, formatDate, callTypeColor } from "@/lib/utils"
 import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, Cell, ComposedChart, ReferenceLine,
 } from "recharts"
 import {
   TrendingUp, TrendingDown, Minus, AlertTriangle, Check, ChevronDown,
-  ChevronRight, Phone, Clock, MessageSquare, Users, RefreshCw,
+  ChevronRight, Phone, MessageSquare, RefreshCw,
 } from "lucide-react"
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -28,14 +28,6 @@ function sentimentColor(s) {
   if (s >= 3) return "text-blue-600"
   if (s >= 2) return "text-amber-600"
   return "text-red-600"
-}
-
-function sentimentBg(s) {
-  if (s == null) return "bg-muted text-muted-foreground"
-  if (s >= 4) return "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-  if (s >= 3) return "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
-  if (s >= 2) return "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300"
-  return "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300"
 }
 
 // Inline SVG sparkline — no recharts overhead for tiny 80×28 charts

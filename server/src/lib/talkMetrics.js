@@ -72,4 +72,4 @@ function computeCallMetrics(t) {
   };
 }
 
-module.exports = { inferRole, computeCallMetrics };
+module.exports = { computeCallMetrics };

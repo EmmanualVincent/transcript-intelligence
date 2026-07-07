@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "react-router-dom"
 import { api } from "@/api"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn, callTypeColor, sentimentBg, formatScore, formatDate, threadRoleLabel, momentTypeColor } from "@/lib/utils"
@@ -114,7 +114,7 @@ export default function Incidents() {
       <div className="relative">
         <div className="absolute left-4 top-0 bottom-0 w-px bg-border z-0" />
         <div className="space-y-6">
-          {thread.map((t, i) => {
+          {thread.map((t) => {
             const churnCount = (t.keyMoments || []).filter(k => k.type === "churn_signal").length
             return (
               <Link key={t.id} to={`/transcripts/${t.id}`}>

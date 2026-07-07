@@ -2,13 +2,12 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "react-router-dom"
 import { api } from "@/api"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn, riskColor, callTypeColor, formatDate } from "@/lib/utils"
-import { ClipboardList, AlertTriangle, User, Building2, ChevronRight, ChevronDown } from "lucide-react"
+import { User, Building2, ChevronRight, ChevronDown } from "lucide-react"
 
-const RISK_ORDER = { critical: 0, high: 1, medium: 2, low: 3, null: 4 }
 
 function StatCard({ label, value, sub, accent }) {
   return (

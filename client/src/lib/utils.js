@@ -136,12 +136,3 @@ export function formatDuration(mins) {
   const rem = m % 60
   return rem === 0 ? `${h}h` : `${h}h ${rem}m`
 }
-
-export function sentimentLabel(score) {
-  if (score == null) return "Unknown"
-  if (score >= 4.5) return "Very Positive"
-  if (score >= 3.5) return "Positive"
-  if (score >= 2.5) return "Mixed"
-  if (score >= 1.5) return "Negative"
-  return "Very Negative"
-}

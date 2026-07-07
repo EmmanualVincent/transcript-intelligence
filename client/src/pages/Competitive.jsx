@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn, formatScore, sentimentBg, callTypeColor, formatDate } from "@/lib/utils"
-import { Swords, ArrowRight, ChevronRight, TrendingDown, ShieldCheck } from "lucide-react"
+import { ChevronRight, TrendingDown, ShieldCheck } from "lucide-react"
 
 const COMPETITOR_COLORS = {
   SentinelShield: "from-red-500 to-rose-600",

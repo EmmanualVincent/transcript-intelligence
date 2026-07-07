@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Select } from "@/components/ui/select"
 import { cn, riskColor, riskBarColor, formatScore, formatDate, daysAgo, sentimentColor } from "@/lib/utils"
-import { AlertTriangle, TrendingDown, Shield, ChevronRight, ArrowUpDown, AlertCircle, Clock, Eye, CheckCircle } from "lucide-react"
+import { AlertTriangle, TrendingDown, Shield, ChevronRight, ArrowUpDown } from "lucide-react"
+import { classifyTier, TIER_CONFIG } from "@/lib/tiers"
 
 const RISK_LEVELS = ["", "critical", "high", "medium", "low"]
 const SORT_OPTIONS = [
@@ -16,24 +17,6 @@ const SORT_OPTIONS = [
   { value: "lastCall", label: "Last Call" },
   { value: "name", label: "Name" },
 ]
-
-function classifyTier(account) {
-  const hasRenewal = account.hasUpcomingRenewal
-  const hasChurn   = account.churnSignalCount >= 1
-  const hasComp    = (account.competitorMentions ?? account.competitors?.length ?? 0) >= 1
-  const signals    = [hasRenewal, hasChurn, hasComp].filter(Boolean).length
-  if (signals === 3) return "act_now"
-  if (signals === 2) return "act_soon"
-  if (account.riskLevel === "critical" || (account.riskLevel === "high" && account.churnSignalCount >= 2)) return "watch"
-  return "safe"
-}
-
-const TIER_CONFIG = {
-  act_now:  { label: "Act Now",       icon: AlertCircle,  className: "bg-red-100 text-red-700 border-red-300" },
-  act_soon: { label: "Act Soon",      icon: Clock,        className: "bg-orange-100 text-orange-700 border-orange-300" },
-  watch:    { label: "Watch Closely", icon: Eye,          className: "bg-amber-100 text-amber-700 border-amber-300" },
-  safe:     { label: "Safe",          icon: CheckCircle,  className: "bg-emerald-100 text-emerald-700 border-emerald-300" },
-}
 
 function RiskBadge({ level }) {
   const icons = { critical: AlertTriangle, high: TrendingDown, medium: Shield, low: Shield }

@@ -9,7 +9,7 @@ import { Select } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { cn, callTypeColor, categoryColor, formatScore, sentimentBg, formatDate, formatDuration } from "@/lib/utils"
-import { Search, Filter, ChevronRight, ChevronLeft, Clock, Users } from "lucide-react"
+import { Search, ChevronRight, ChevronLeft, Clock, Users } from "lucide-react"
 
 const CALL_TYPES = ["", "internal", "external", "support"]
 const CATEGORIES = ["", "incident", "renewal", "compliance", "support", "product", "competitive", "onboarding", "ops"]

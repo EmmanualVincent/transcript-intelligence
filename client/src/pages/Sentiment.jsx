@@ -3,13 +3,12 @@ import { useQuery } from "@tanstack/react-query"
 import { api } from "@/api"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
 import { cn, formatScore } from "@/lib/utils"
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  BarChart, Bar, Cell, RadarChart, PolarGrid, PolarAngleAxis, Radar
+  BarChart, Bar, Cell
 } from "recharts"
-import { TrendingDown, AlertTriangle, ArrowUp } from "lucide-react"
+import { AlertTriangle, ArrowUp } from "lucide-react"
 
 const CALL_TYPE_COLORS = {
   internal: "#6366f1",

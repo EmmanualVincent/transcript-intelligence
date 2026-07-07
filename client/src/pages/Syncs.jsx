@@ -200,7 +200,7 @@ export default function Syncs() {
               <CardTitle className="text-sm font-semibold">Most Active Participants</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {topParticipants.map(({ name, count }, i) => (
+              {topParticipants.map(({ name, count }) => (
                 <div key={name} className="flex items-center gap-3">
                   <div className="h-7 w-7 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
                     {name.split(' ').map(n => n[0]).join('').slice(0, 2)}

@@ -2,13 +2,12 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "react-router-dom"
 import { api } from "@/api"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn, formatScore, formatDate, riskColor } from "@/lib/utils"
 import {
-  TrendingUp, TrendingDown, AlertTriangle, Zap, Star, RefreshCw,
-  ArrowUpRight, MessageSquare, ChevronRight, Users, BarChart2,
+  AlertTriangle, Zap, Star, RefreshCw,
+  ArrowUpRight, ChevronRight, Users, BarChart2,
 } from "lucide-react"
 
 const PRODUCT_STYLE = {
@@ -34,7 +33,7 @@ const ISSUE_STYLE = {
   concern:      { dot: "bg-amber-500",  label: "Concern"        },
 }
 
-function HealthBar({ score, style }) {
+function HealthBar({ score }) {
   const color = score >= 70 ? "bg-emerald-500"
     : score >= 50 ? "bg-blue-500"
     : score >= 30 ? "bg-amber-500"
@@ -63,7 +62,7 @@ function StatPill({ label, value, positive }) {
   )
 }
 
-function QuoteCard({ quote, style }) {
+function QuoteCard({ quote }) {
   return (
     <Link
       to={`/transcripts/${quote.transcriptId}`}
@@ -260,7 +259,6 @@ export default function ProductHealth() {
     : b.callCount - a.callCount
   )
 
-  const totalAccounts = new Set(products.flatMap(p => [])).size // rough
   const avgHealth = products.length
     ? Math.round(products.reduce((s, p) => s + p.healthScore, 0) / products.length)
     : 0

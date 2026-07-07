@@ -63,8 +63,6 @@ export default function TranscriptDetail() {
   const utterances = t.utterances || []
   const displayed = showFull ? utterances : utterances.slice(0, 40)
 
-  const churnSignals = (t.keyMoments || []).filter(k => k.type === "churn_signal")
-  const featureGaps = (t.keyMoments || []).filter(k => k.type === "feature_gap")
   const momentTypes = [...new Set((t.keyMoments || []).map(k => k.type))]
 
   const totalTalkTime = Object.values(t.speakerStats || {}).reduce((s, sp) => s + sp.totalDuration, 0)
