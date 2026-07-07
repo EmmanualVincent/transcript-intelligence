@@ -1,6 +1,7 @@
 'use strict';
 
 const KNOWN_COMPETITORS = require('./competitors').KNOWN_COMPETITORS;
+const { avg } = require('./util');
 
 const CHURN_TOPICS = new Set([
   'churn risk', 'competitive threat', 'sla breach', 'service outage',
@@ -76,10 +77,7 @@ function computeAccountHealth(transcripts) {
   }
 
   return Object.values(map).map(acc => {
-    const avgSentimentScore =
-      acc.sentimentScores.length
-        ? Math.round((acc.sentimentScores.reduce((s, x) => s + x, 0) / acc.sentimentScores.length) * 10) / 10
-        : null;
+    const avgSentimentScore = avg(acc.sentimentScores, 1);
 
     let riskScore = 0;
 
@@ -136,4 +134,14 @@ function computeAccountHealth(transcripts) {
   }).sort((a, b) => b.riskScore - a.riskScore);
 }
 
-module.exports = { computeAccountHealth };
+// name -> { riskLevel, riskScore } lookup, used by routes that annotate
+// per-transcript or per-owner data with the parent account's risk.
+function riskByAccountName(accounts) {
+  const map = {};
+  for (const a of accounts) {
+    map[a.name] = { riskLevel: a.riskLevel, riskScore: a.riskScore };
+  }
+  return map;
+}
+
+module.exports = { computeAccountHealth, riskByAccountName };

@@ -2,6 +2,7 @@
 
 const { Router } = require('express');
 const { getStore } = require('../data/store');
+const { KNOWN_COMPETITORS } = require('../lib/competitors');
 
 const router = Router();
 
@@ -56,10 +57,8 @@ router.get('/', (req, res) => {
     // Competitor context: pull from summary sentences that name a competitor
     const summary = t.summary || '';
     if (!competitorContextByAccount[name]) competitorContextByAccount[name] = [];
-    // Keep first 180 chars of summary per transcript that mentions a competitor
-    const compNames = ['SentinelShield','CyberNova','Wiz','VaultGuard','CrowdStrike','Splunk','VaultEdge','Fortiguard'];
     const lc = summary.toLowerCase();
-    for (const comp of compNames) {
+    for (const comp of KNOWN_COMPETITORS) {
       if (lc.includes(comp.toLowerCase())) {
         competitorContextByAccount[name].push({ competitor: comp, transcriptId: t.id, date: t.startTime ? t.startTime.slice(0, 10) : null });
         break; // one entry per transcript

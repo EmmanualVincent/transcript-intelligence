@@ -2,22 +2,9 @@
 
 const { Router } = require('express');
 const { getStore } = require('../data/store');
+const { avg, getWeekStart } = require('../lib/util');
 
 const router = Router();
-
-function avg(arr) {
-  if (!arr.length) return null;
-  return Math.round((arr.reduce((s, x) => s + x, 0) / arr.length) * 100) / 100;
-}
-
-function getWeekStart(dateStr) {
-  const d = new Date(dateStr);
-  const day = d.getUTCDay();
-  const offset = day === 0 ? -6 : 1 - day;
-  const monday = new Date(d);
-  monday.setUTCDate(d.getUTCDate() + offset);
-  return monday.toISOString().slice(0, 10);
-}
 
 // GET /api/syncs
 router.get('/', (req, res) => {
@@ -25,7 +12,7 @@ router.get('/', (req, res) => {
   const internal = transcripts.filter(t => t.callType === 'internal');
 
   // Stat counts
-  const avgSentiment = avg(internal.map(t => t.sentimentScore).filter(s => s != null));
+  const avgSentiment = avg(internal.map(t => t.sentimentScore).filter(s => s != null), 2);
   const allActionItems = internal.flatMap(t => t.actionItems || []);
   const allKeyMoments = internal.flatMap(t =>
     (t.keyMoments || []).map(m => ({ ...m, transcriptId: t.id, transcriptTitle: t.title, date: t.startTime?.slice(0, 10) }))
@@ -79,7 +66,7 @@ router.get('/', (req, res) => {
   }
   const sentimentTimeline = Object.keys(weekMap).sort().map(week => ({
     weekStart: week,
-    avgScore: avg(weekMap[week]),
+    avgScore: avg(weekMap[week], 2),
     count: weekMap[week].length,
   }));
 

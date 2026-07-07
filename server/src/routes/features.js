@@ -2,6 +2,7 @@
 
 const { Router } = require('express');
 const { getStore } = require('../data/store');
+const { riskByAccountName } = require('../lib/accounts');
 
 const router = Router();
 
@@ -22,11 +23,7 @@ function inferProductArea(text) {
 router.get('/', (req, res) => {
   const { transcripts, accounts } = getStore();
 
-  // Build account risk lookup
-  const riskByAccount = {};
-  for (const acc of accounts) {
-    riskByAccount[acc.name] = { riskLevel: acc.riskLevel, riskScore: acc.riskScore };
-  }
+  const riskByAccount = riskByAccountName(accounts);
 
   const RISK_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
 

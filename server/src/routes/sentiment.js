@@ -2,24 +2,11 @@
 
 const { Router } = require('express');
 const { getStore } = require('../data/store');
+const { avg, getWeekStart } = require('../lib/util');
 
 const router = Router();
 
 const SENTIMENT_ORDER = ['very-negative', 'negative', 'mixed-negative', 'mixed-positive', 'positive', 'very-positive'];
-
-function getWeekStart(dateStr) {
-  const d = new Date(dateStr);
-  const day = d.getUTCDay(); // 0 = Sun
-  const offset = day === 0 ? -6 : 1 - day; // shift to Monday
-  const monday = new Date(d);
-  monday.setUTCDate(d.getUTCDate() + offset);
-  return monday.toISOString().slice(0, 10);
-}
-
-function avg(arr) {
-  if (!arr.length) return null;
-  return Math.round((arr.reduce((s, x) => s + x, 0) / arr.length) * 100) / 100;
-}
 
 // GET /api/sentiment/timeline
 router.get('/timeline', (req, res) => {
@@ -47,12 +34,12 @@ router.get('/timeline', (req, res) => {
       const w = weekMap[week];
       return {
         weekStart: w.weekStart,
-        avgScore: avg(w.scores),
+        avgScore: avg(w.scores, 2),
         transcriptCount: w.scores.length,
         byCallType: {
-          internal: avg(w.byCallType.internal),
-          external: avg(w.byCallType.external),
-          support: avg(w.byCallType.support),
+          internal: avg(w.byCallType.internal, 2),
+          external: avg(w.byCallType.external, 2),
+          support: avg(w.byCallType.support, 2),
         },
       };
     });
@@ -85,13 +72,13 @@ router.get('/by-category', (req, res) => {
   }
 
   const byCategory = Object.fromEntries(
-    Object.entries(categoryScores).map(([cat, scores]) => [cat, avg(scores)])
+    Object.entries(categoryScores).map(([cat, scores]) => [cat, avg(scores, 2)])
   );
 
   const byCallType = {
-    internal: avg(callTypeScores.internal),
-    external: avg(callTypeScores.external),
-    support: avg(callTypeScores.support),
+    internal: avg(callTypeScores.internal, 2),
+    external: avg(callTypeScores.external, 2),
+    support: avg(callTypeScores.support, 2),
   };
 
   const distribution = SENTIMENT_ORDER
@@ -119,7 +106,7 @@ router.get('/by-topic', (req, res) => {
   const topics = Object.entries(topicData)
     .map(([topic, data]) => ({
       topic,
-      avgSentiment: avg(data.scores),
+      avgSentiment: avg(data.scores, 2),
       count: data.scores.length,
       callTypes: [...data.callTypes],
     }))
@@ -148,8 +135,8 @@ router.get('/divergence', (req, res) => {
   const divergent = Object.entries(accountData)
     .filter(([, d]) => d.external.length > 0 && d.support.length > 0)
     .map(([account, d]) => {
-      const extAvg = avg(d.external);
-      const supAvg = avg(d.support);
+      const extAvg = avg(d.external, 2);
+      const supAvg = avg(d.support, 2);
       return {
         account,
         externalAvg: extAvg,

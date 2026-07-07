@@ -1,5 +1,7 @@
 'use strict';
 
+const { avg } = require('./util');
+
 const KNOWN_COMPETITORS = [
   'SentinelShield',
   'CyberNova',
@@ -7,6 +9,8 @@ const KNOWN_COMPETITORS = [
   'VaultGuard',
   'CrowdStrike',
   'Splunk',
+  'VaultEdge',
+  'Fortiguard',
 ];
 
 // Words near these that suggest a competitor mention is meaningful
@@ -79,11 +83,7 @@ function extractCompetitors(transcripts) {
       const e = map[comp];
       if (e.mentionCount === 0) return null;
 
-      const scores = e.sentimentScores;
-      const avgSentimentAtMention =
-        scores.length
-          ? Math.round((scores.reduce((s, x) => s + x, 0) / scores.length) * 10) / 10
-          : null;
+      const avgSentimentAtMention = avg(e.sentimentScores, 1);
 
       return {
         name: e.name,

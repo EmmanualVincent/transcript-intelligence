@@ -2,6 +2,7 @@
 
 const { Router } = require('express');
 const { getStore } = require('../data/store');
+const { avg } = require('../lib/util');
 
 const router = Router();
 
@@ -31,12 +32,10 @@ router.get('/', (req, res) => {
     }
   }
 
-  const avg = arr => arr.length ? Math.round((arr.reduce((s, x) => s + x, 0) / arr.length) * 10) / 10 : null;
-
   const avgSentimentByCallType = {
-    internal: avg(sentimentByCallType.internal),
-    external: avg(sentimentByCallType.external),
-    support: avg(sentimentByCallType.support),
+    internal: avg(sentimentByCallType.internal, 1),
+    external: avg(sentimentByCallType.external, 1),
+    support: avg(sentimentByCallType.support, 1),
   };
 
   const criticalAccounts = accounts.filter(a => a.riskLevel === 'critical');
@@ -49,7 +48,7 @@ router.get('/', (req, res) => {
     callTypeBreakdown,
     categoryBreakdown,
     avgSentimentByCallType,
-    overallAvgSentiment: avg([...sentimentByCallType.internal, ...sentimentByCallType.external, ...sentimentByCallType.support]),
+    overallAvgSentiment: avg([...sentimentByCallType.internal, ...sentimentByCallType.external, ...sentimentByCallType.support], 1),
     totalChurnSignals,
     totalFeatureGaps,
     totalPraise,

@@ -2,6 +2,7 @@
 
 const { Router } = require('express');
 const { getStore } = require('../data/store');
+const { riskByAccountName } = require('../lib/accounts');
 
 const router = Router();
 
@@ -15,10 +16,7 @@ function parseOwner(actionItem) {
 }
 
 function buildActionIndex(transcripts, accounts) {
-  const accountRiskMap = {};
-  for (const a of accounts) {
-    accountRiskMap[a.name] = { riskLevel: a.riskLevel, riskScore: a.riskScore };
-  }
+  const accountRiskMap = riskByAccountName(accounts);
 
   const ownerMap = {};
   const accountMap = {};

@@ -2,13 +2,10 @@
 
 const { Router } = require('express');
 const { getStore } = require('../data/store');
+const { avg } = require('../lib/util');
+const { riskByAccountName } = require('../lib/accounts');
 
 const router = Router();
-
-function avg(arr) {
-  if (!arr.length) return null;
-  return Math.round((arr.reduce((s, x) => s + x, 0) / arr.length) * 100) / 100;
-}
 
 // Assign a transcript to its primary product by scanning title + topics + summary
 function inferProduct(t) {
@@ -38,10 +35,7 @@ const PRODUCT_ORDER = ['Comply', 'Identity', 'Detect', 'Protect', 'LogVault', 'P
 router.get('/', (req, res) => {
   const { transcripts, accounts } = getStore();
 
-  const riskByAccount = {};
-  for (const acc of accounts) {
-    riskByAccount[acc.name] = { riskLevel: acc.riskLevel, riskScore: acc.riskScore };
-  }
+  const riskByAccount = riskByAccountName(accounts);
 
   const external = transcripts.filter(t => t.callType === 'external');
 
@@ -133,7 +127,7 @@ router.get('/', (req, res) => {
       const b = buckets[name];
       if (b.callCount === 0) return null;
 
-      const avgSentiment = avg(b.sentiment);
+      const avgSentiment = avg(b.sentiment, 2);
 
       // Health score: rate-based so high-volume products aren't unfairly penalized
       const calls = b.callCount;

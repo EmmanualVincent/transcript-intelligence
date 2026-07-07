@@ -3,22 +3,13 @@
 const { Router } = require('express');
 const { getStore } = require('../data/store');
 const { computeCallMetrics } = require('../lib/talkMetrics');
+const { avg, getWeekStart } = require('../lib/util');
 
 const router = Router();
 
 function emailToName(email) {
   const local = email.split('@')[0];
   return local.split('.').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
-}
-
-function getWeekStart(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr);
-  const day = d.getUTCDay();
-  const diff = day === 0 ? -6 : 1 - day;
-  d.setUTCDate(d.getUTCDate() + diff);
-  d.setUTCHours(0, 0, 0, 0);
-  return d.toISOString().slice(0, 10);
 }
 
 function weekLabel(weekStart) {
@@ -43,10 +34,6 @@ function computeTrendDirection(history) {
   if (recentAvg - prevAvg > 0.25) return 'improving';
   if (prevAvg - recentAvg > 0.25) return 'declining';
   return 'stable';
-}
-
-function avg(arr) {
-  return arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : null;
 }
 
 router.get('/', (req, res) => {
