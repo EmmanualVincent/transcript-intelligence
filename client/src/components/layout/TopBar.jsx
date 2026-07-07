@@ -3,7 +3,6 @@ import { ChevronRight, Sun, Moon } from "lucide-react"
 
 const labels = {
   "": "Dashboard",
-  "incidents": "Incident Thread",
   "transcripts": "Transcripts",
   "sentiment": "Sentiment Analysis",
   "accounts": "Account Health",

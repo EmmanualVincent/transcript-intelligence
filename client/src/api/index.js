@@ -26,7 +26,6 @@ export const api = {
   account: (name) => get(`/accounts/${encodeURIComponent(name)}`),
   competitive: () => get('/competitive'),
   competitor: (name) => get(`/competitive/${encodeURIComponent(name)}`),
-  incidents: () => get('/incidents'),
   features: () => get('/features'),
   actions: () => get('/actions'),
   syncs: () => get('/syncs'),
