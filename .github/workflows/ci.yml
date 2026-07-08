@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install server deps
+        working-directory: server
+        run: npm ci
+      - name: Backend tests
+        working-directory: server
+        run: npm test
+      - name: Install client deps
+        working-directory: client
+        run: npm ci
+      - name: Lint
+        working-directory: client
+        run: npm run lint
+      - name: Build client
+        working-directory: client
+        run: npm run build
+
+  deploy:
+    # Only deploy green commits that land on master — never on PRs.
+    needs: build
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy
+        run: curl -fsS "$RENDER_DEPLOY_HOOK"
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
