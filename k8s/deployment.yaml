@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transcript-intelligence
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: transcript-intelligence }
+  template:
+    metadata:
+      labels: { app: transcript-intelligence }
+    spec:
+      containers:
+        - name: app
+          image: transcript-intelligence:latest
+          imagePullPolicy: IfNotPresent   # use the locally-built image, don't pull
+          ports:
+            - containerPort: 3001
+          readinessProbe:
+            httpGet: { path: /health, port: 3001 }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: transcript-intelligence
+spec:
+  selector: { app: transcript-intelligence }
+  ports:
+    - port: 3001
+      targetPort: 3001

@@ -3,20 +3,25 @@
 const KNOWN_COMPETITORS = require('./competitors').KNOWN_COMPETITORS;
 const { avg } = require('./util');
 
+// Topics that count as a churn/risk concern when they show up on a call.
+// Matched case-insensitively against transcript.topics.
 const CHURN_TOPICS = new Set([
   'churn risk', 'competitive threat', 'sla breach', 'service outage',
   'outage', 'platform outage', 'vendor review', 'competitive displacement',
   'churn signal', 'incident escalation',
 ]);
 
+// Roll every transcript up to its customer account, then score each account's
+// churn risk. Returns accounts sorted highest-risk first.
 function computeAccountHealth(transcripts) {
-  const map = {};
+  const map = {}; // account name -> running accumulator
 
   for (const t of transcripts) {
-    if (!t.customerAccount) continue;
+    if (!t.customerAccount) continue; // internal calls have no account to attribute
 
     const name = t.customerAccount;
     if (!map[name]) {
+      // First time we see this account: seed the accumulator.
       map[name] = {
         name,
         transcriptIds: [],
@@ -76,9 +81,11 @@ function computeAccountHealth(transcripts) {
     }
   }
 
+  // Second pass: turn each accumulator into a scored, serializable account.
   return Object.values(map).map(acc => {
     const avgSentimentScore = avg(acc.sentimentScores, 1);
 
+    // Additive risk model: each signal contributes points, capped at 100.
     let riskScore = 0;
 
     // Churn signals (strongest predictor)
